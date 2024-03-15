@@ -89,21 +89,26 @@ def plot_figure(re_data, scaler, con_dim, path='Generated Data.png'):
     # print(orig_data[:, -con_dim].mean())
     cmap = plt.get_cmap('RdBu_r')
     fig, ax = plt.subplots()
-    for i, condition in zip(orig_data[:,:-con_dim], orig_data[:, -con_dim]):
-        # Convert the condition into a color
-        color = cmap((condition - orig_data[:, -con_dim].min()) /
-                        (orig_data[:, -con_dim].max() - orig_data[:, -con_dim].min()))
-        ax.plot(i, color=color)
-        
-    # Add a colorbar
-    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(
-        vmin=orig_data[:, -con_dim].min(), vmax=orig_data[:, -con_dim].max()))
-    sm.set_array([])
-    cbar = plt.colorbar(sm, ax=ax)
-    cbar.set_label('Condition Value scaled',
-                    rotation=270, labelpad=20)
-    plt.show()
-    # plt.savefig(path)
+    
+    if con_dim > 0:
+        for i, condition in zip(orig_data[:,:-con_dim], orig_data[:, -con_dim]):
+            # Convert the condition into a color
+            color = cmap((condition - orig_data[:, -con_dim].min()) /
+                            (orig_data[:, -con_dim].max() - orig_data[:, -con_dim].min()))
+            ax.plot(i, color=color)
+            
+        # Add a colorbar
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(
+            vmin=orig_data[:, -con_dim].min(), vmax=orig_data[:, -con_dim].max()))
+        sm.set_array([])
+        cbar = plt.colorbar(sm, ax=ax)
+        cbar.set_label('Condition Value scaled',
+                        rotation=270, labelpad=20)
+        plt.show()
+    else:
+        for i in orig_data:
+            ax.plot(i, color='blue' , alpha=0.5)
+        plt.show()
     
 def adjust_learning_rate(optimizer, epoch, initial_lr, epochs):
     lr = initial_lr
@@ -142,10 +147,10 @@ def train(model, train_loader, optimizer, epochs, cond_dim ,device, scaler, lr, 
                 
        
         adjust_learning_rate(optimizer, epoch, lr, epochs)
-        print(epoch, 'loss: ', loss.item())
+      
         if epoch % pgap == 0:
-            # print(epoch, 'loss: ', loss.item())
-             
+
+            print(epoch, 'loss: ', loss.item())
             model.eval()
             
             # plot the generated data
@@ -169,3 +174,27 @@ def train(model, train_loader, optimizer, epochs, cond_dim ,device, scaler, lr, 
             
 
 
+
+def compute_quantile(pre_data):
+    q = np.arange(0.01, 1, 0.01)
+    quantile_value = np.quantile(pre_data, q, axis=0)
+    return quantile_value 
+
+def pinball_loss_compute(y, f, q):
+    if y >= f:
+        return (y - f) * q
+    else:
+        return (f - y) * (1 - q)
+    
+def plloss(pre_data, true_data):
+
+    quantile_values = compute_quantile(pre_data)
+    q = np.arange(0.01, 1, 0.01)
+    
+    loss = []
+    for i in range(len(q)):
+        ind_loss = [pinball_loss_compute(y, f, q[i]) for y, f in zip(true_data, quantile_values[i,:])]
+        loss.append(np.mean(ind_loss))
+    pinball_loss = np.mean(loss)
+
+    return pinball_loss
