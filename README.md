@@ -14,6 +14,11 @@ To get started with our models and understand how they work, we have prepared se
 
 We highly recommend going through these tutorials in the order listed above to gain a comprehensive understanding of the models and their applications. Especially **Conditional Generation** tutorial.
 
+## Code of other models
+For the code of t-Copula used in the paper, please check: [t-Copula](https://github.com/MauricioSalazare/multi-copula)
+
+For the of GAN, VAE, etc, please check: [Generative models](https://github.com/xiaweijie1996/Generative-Models-for-Customer-Profile-Generation).
+
 ## FCPFlow
 
 ![ffctfflow+str](https://github.com/xiaweijie1996/Full-Convolutional-Time-Series-Flow/assets/84010474/f29e1a10-0ae9-4a76-b20a-c9c1e5d781c3)
