@@ -1,4 +1,4 @@
-# Full-Convolutional-Time-Series-Flow
+# Full-Convolutional-Profile-Flow
 
 Welcome to the repository containing the implementation of algorithms from the paper titled *'A Flow-Based Model for Conditional and Probabilistic Electricity Consumption Profile Generation and Prediction'.*
 
