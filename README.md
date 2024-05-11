@@ -48,6 +48,3 @@ Xia, W., Wang, C., Palensky, P., & Vergara, P. P. (2024). _A Flow-Based Model fo
   journal={arXiv preprint arXiv:2405.02180},
   year={2024}
 }
-
-
-
