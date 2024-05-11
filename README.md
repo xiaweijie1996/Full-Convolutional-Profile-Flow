@@ -34,3 +34,20 @@ The research uses raw data from the following open-source databases:
 - **USA Smart Meter Data**:  [DATAPORT](https://dataport.pecanstreet.org/)
 
 
+## Contact and Citations
+For inquiries, suggestions, or potential collaborations, please reach out to Weijie Xia at [w.xia@tudelft.nl](mailto:w.xia@tudelft.nl).
+
+To cite the research paper related to this project, please use the following Bibtex entry:
+
+Xia, W., Wang, C., Palensky, P., & Vergara, P. P. (2024). _A Flow-Based Model for Conditional and Probabilistic Electricity Consumption Profile Generation and Prediction_. arXiv preprint arXiv:2405.02180.
+
+```bibtex
+@article{xia2024flow,
+  title={A Flow-Based Model for Conditional and Probabilistic Electricity Consumption Profile Generation and Prediction},
+  author={Xia, Weijie and Wang, Chenguang and Palensky, Peter and Vergara, Pedro P},
+  journal={arXiv preprint arXiv:2405.02180},
+  year={2024}
+}
+
+
+
