@@ -6,11 +6,11 @@ Welcome to the repository containing the implementation of algorithms from the p
 
 To get started with our models and understand how they work, we have prepared several tutorials. Please click on the links below to explore them:
 
-**Conditional Generation** [Conditional Generation Tutorial](tutorial_conditioanl_gen.ipynb): (**Beginner friendly**) This tutorial guides you through generating electricity consumption profiles conditionally.
+[Conditional Generation Tutorial](tutorial_conditioanl_gen.ipynb): (**Beginner friendly**) This tutorial guides you through generating electricity consumption profiles conditionally.
 
-**Unconditional Generation** [Unconditional Generation Tutorial](tutorial_uncond_gen.ipynb): Learn how to generate electricity consumption profiles without specific conditions.
+[Unconditional Generation Tutorial](tutorial_uncond_gen.ipynb): Learn how to generate electricity consumption profiles without specific conditions.
 
-**Prediction** [Prediction Tutorial](tutorial_prediction.ipynb): Dive into predicting future electricity consumption profiles based on past data.
+[Prediction Tutorial](tutorial_prediction.ipynb): Dive into predicting future electricity consumption profiles based on past data.
 
 We highly recommend going through these tutorials in the order listed above to gain a comprehensive understanding of the models and their applications. Especially **Conditional Generation** tutorial.
 
