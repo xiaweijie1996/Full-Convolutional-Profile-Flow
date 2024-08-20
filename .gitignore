@@ -1,7 +1,10 @@
-alg\__pycache__\
+# ignore python cache files
+alg/__pycache__/
 .venv
-
 
 # ignore model files and figures
 exp/uncond_rlp_generation/exp_ge/FCPflow_model.pth
 exp/uncond_rlp_generation/exp_ge/FCPflow_generated.png
+
+# ingore wandb files
+wandb/

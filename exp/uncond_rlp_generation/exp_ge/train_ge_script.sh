@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #SBATCH --job-name="EM-trans"
-#SBATCH --partition=gpu-a100
+#SBATCH --partition=gpu-v100
 #SBATCH --time=99:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=6
