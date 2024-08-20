@@ -1,13 +1,13 @@
 FCPflow:
   #--------Define the model--------
-  num_blocks: 4
-  sfactor: 0.7
-  hidden_dim: 48
+  num_blocks: 8
+  sfactor: 0.3
+  hidden_dim: 192
   num_channels: 96 # resolution of the time series 
   condition_dim: 1 # unconditioned generation
 
   #--------Define the training--------
-  lr: 0.0001
-  w_decay: 0.001
-  batch_size: 250
+  lr: 0.001
+  w_decay: 0.0
+  batch_size: 2131
 

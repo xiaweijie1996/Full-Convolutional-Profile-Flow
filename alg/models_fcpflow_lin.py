@@ -15,6 +15,8 @@ class InvertibleNorm(nn.Module):
         self.momentum = 0.1
 
     def forward(self, input):
+        device = input.device
+        
         if self.training:
             # Calculate mean and std dev for the current batch
             mean = torch.mean(input, dim=[0, 2], keepdim=True)
@@ -24,11 +26,11 @@ class InvertibleNorm(nn.Module):
             normalized_input = (input - mean) / std
 
             # Update running statistics
-            self.running_mean = (1 - self.momentum) * self.running_mean + self.momentum * mean
-            self.running_std = (1 - self.momentum) * self.running_std + self.momentum * std
+            self.running_mean = (1 - self.momentum) * self.running_mean.to(device) + self.momentum * mean
+            self.running_std = (1 - self.momentum) * self.running_std.to(device) + self.momentum * std
         else:
             # Normalize input using running statistics during evaluation
-            normalized_input = (input - self.running_mean) / self.running_std
+            normalized_input = (input - self.running_mean.to(device)) / self.running_std.to(device)
 
         # log-determinant of the Jacobian
         self.scale = 1 / (std + 1e-10)
@@ -38,8 +40,10 @@ class InvertibleNorm(nn.Module):
         return normalized_input, log_det
 
     def inverse(self, output):
+        device = output.device
+        
         # Use running_mean and running_std for the inverse normalization
-        return (output * self.running_std) + self.running_mean
+        return (output * self.running_std.to(device)) + self.running_mean.to(device)
     
 
 class InvertibleWConv(nn.Module):
@@ -52,7 +56,8 @@ class InvertibleWConv(nn.Module):
         self.w = nn.Parameter(w_init)
 
     def forward(self, input):
-        out = F.conv1d(input, self.w.view(self.num_channels, self.num_channels, 1))
+        device = input.device
+        out = F.conv1d(input, self.w.view(self.num_channels, self.num_channels, 1).to(device))
         log_det = torch.slogdet(self.w)[1]
         return out, log_det
 
@@ -89,9 +94,9 @@ class Simple1DfullConvNet(nn.Module):
         )
         
         self.linear_model = nn.Linear(self.h_c, self.out_c)
-        # self.leakrelu = nn.LeakyReLU(0.2)
         
     def forward(self, x):
+
         if not self.linear:
                 # x = x.reshape(x.shape[0], self.in_c, 1)
                 x = self.model(x)
@@ -154,8 +159,11 @@ class ConditionalAffineCouplingLayer(nn.Module):
         return pe.reshape(1, length)
         
     def forward(self, x, condition):
+        # Device 
+        device = x.device
+        
         # First Affine Transformation with mask1
-        x = x + self._positional_encoding(x)
+        x = x + self._positional_encoding(x).to(device)
         x11 = x[:,0::2]
         x12 = x[:,1::2]
         s1 = self.scale_net1(torch.cat([x11, condition], dim=1))
@@ -216,7 +224,7 @@ class ConditionalAffineCouplingLayer(nn.Module):
         x[:,0::2] = x11
         x[:,1::2] = x12
         
-        x = x - self._positional_encoding(x)
+        x = x - self._positional_encoding(x).to(x.device)
         return x
     
         
@@ -289,10 +297,10 @@ class FCPflow(nn.Module): # Fully convolutional time flow
 
 if __name__ == '__main__':
     # check the model
-    model = FCPflow(2, 48, 0.3, 48, 48)
-    x = torch.randn(64, 48)
+    model = FCPflow(2, 48, 0.3, 48, 48).to('cuda')  
+    x = torch.randn(64, 48).to('cuda')
 
-    condition = torch.randn(64, 48)
+    condition = torch.randn(64, 48).to('cuda')
     y, log_det = model(x, condition)
     x_re = model.inverse(y, condition)
     print('x: ', x.shape)

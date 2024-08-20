@@ -16,7 +16,7 @@ import alg.tools_train as tl
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # import the configuration
-with open(os.path.join('config_ge.yaml')) as file:
+with open(os.path.join(_parent_path,'exp/uncond_rlp_generation/exp_ge/config_ge.yaml')) as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
         
 # define the data loader
@@ -29,7 +29,7 @@ dataloader, scaler = tl.create_data_loader(np_array, config['FCPflow']['batch_si
 
 # train the model
 model = fcpf.FCPflow(config['FCPflow']['num_blocks'], config['FCPflow']['num_channels'], 
-                        config['FCPflow']['sfactor'], config['FCPflow']['hidden_dim'], config['FCPflow']['condition_dim'])
+                        config['FCPflow']['sfactor'], config['FCPflow']['hidden_dim'], config['FCPflow']['condition_dim']).to(device)
 
 print('number of parameters: ', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
@@ -42,5 +42,6 @@ optimizer = torch.optim.Adam(model.parameters(), lr=config['FCPflow']['lr'], wei
 # wandb.config.update({"num_blocks": num_blocks, "sfactor": sfactor, "hidden_dim": hidden_dim, "lr": lr, "w_decay": w_decay})
 
 # train the model
-tl.train(model, dataloader, optimizer, 400001, config['FCPflow']['condition_dim'], device, scaler, dataloader, 10)
+path = os.path.join(_parent_path, 'exp', 'uncond_rlp_generation', 'exp_ge')
+tl.train(path, model, dataloader, optimizer, 400001, config['FCPflow']['condition_dim'], device, scaler, dataloader, 100)
 

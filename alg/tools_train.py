@@ -1,15 +1,15 @@
-# import models_fctflow as fctf
 from torch.utils.data import DataLoader, TensorDataset
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler  
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
-torch.set_default_dtype(torch.float64)
 # import wandb
-from scipy.stats import energy_distance
-import pandas as pd
+# from scipy.stats import energy_distance
+# import pandas as pd
 from scipy.stats import kendalltau
 from sklearn.metrics import mean_squared_error
+
+torch.set_default_dtype(torch.float64)
 
 def create_data_loader(numpy_array, batch_size=32, shuffle=True):
     """
@@ -88,34 +88,53 @@ def calculate_autocorrelation_mse(dataset1, dataset2):
     
     return mse
     
+
+def plot_figure(pre, re_data, scaler, con_dim, path='Generated Data Comparison.png'):
+    # Inverse transform to get the original scale of the data
+    orig_data_pre = scaler.inverse_transform(pre.cpu().detach().numpy())
+    orig_data_re = scaler.inverse_transform(re_data.cpu().detach().numpy())
     
-def plot_figure(re_data, scaler, con_dim, path='Generated Data.png'):
-    orig_data = scaler.inverse_transform(re_data.detach().numpy())
     cmap = plt.get_cmap('RdBu_r')
-    fig, ax = plt.subplots()
+    fig, axs = plt.subplots(2, 1, figsize=(10, 8))  # Two rows for comparison
     
     if con_dim > 0:
-        _cond = orig_data[:,:-con_dim].sum(axis=1)
-        for i, condition in zip(orig_data[:,:-con_dim], _cond):
-            # Convert the condition into a color
-            color = cmap((condition - _cond .min()) /
-                            (_cond .max() - _cond .min()))
-            ax.plot(i, color=color, alpha=0.1)
-            
-        # Add a colorbar
-        sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(
-            vmin=_cond .min(), vmax=_cond .max()))
-        sm.set_array([])
-        cbar = plt.colorbar(sm, ax=ax)
-        cbar.set_label('Condition Value scaled',
-                        rotation=270, labelpad=20)
-        plt.show()
-    else:
-        for i in orig_data:
-            ax.plot(i, color='blue' , alpha=0.1)
-        plt.show()
+        # Original data plot
+        _cond_pre = orig_data_pre[:, :-con_dim].sum(axis=1)
+        for i, condition in zip(orig_data_pre[:, :-con_dim], _cond_pre):
+            color = cmap((condition - _cond_pre.min()) / (_cond_pre.max() - _cond_pre.min()))
+            axs[0].plot(i, color=color, alpha=0.1)
+        axs[0].set_title('Original Data')
         
-    
+        # Reconstructed/Generated data plot
+        _cond_re = orig_data_re[:, :-con_dim].sum(axis=1)
+        for i, condition in zip(orig_data_re[:, :-con_dim], _cond_re):
+            color = cmap((condition - _cond_re.min()) / (_cond_re.max() - _cond_re.min()))
+            axs[1].plot(i, color=color, alpha=0.1)
+        axs[1].set_title('Reconstructed/Generated Data')
+
+        # Add colorbars to each subplot
+        for ax, _cond in zip(axs, [_cond_pre, _cond_re]):
+            sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=_cond.min(), vmax=_cond.max()))
+            sm.set_array([])
+            cbar = plt.colorbar(sm, ax=ax)
+            cbar.set_label('Condition Value scaled', rotation=270, labelpad=20)
+        
+    else:
+        # Original data plot
+        for i in orig_data_pre:
+            axs[0].plot(i, color='blue', alpha=0.1)
+        axs[0].set_title('Original Data')
+
+        # Reconstructed/Generated data plot
+        for i in orig_data_re:
+            axs[1].plot(i, color='red', alpha=0.1)
+        axs[1].set_title('Reconstructed/Generated Data')
+
+    # Adjust layout and save the figure
+    plt.tight_layout()
+    plt.savefig(path)
+    plt.show()
+
 def adjust_learning_rate(optimizer, epoch, initial_lr, epochs):
     lr = initial_lr
     change_point = 5000
@@ -126,8 +145,9 @@ def adjust_learning_rate(optimizer, epoch, initial_lr, epochs):
     
     
 # define a function to train the model
-def train(model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, pgap=1000):
+def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, pgap=1000):
     model.train()
+    loss_mid = 0
     for epoch in range(epochs):
         for _, data in enumerate(train_loader):
             pre = data[0].to(device) # + torch.randn_like(data[0].to(device))/(256)
@@ -140,9 +160,7 @@ def train(model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test
             
             # compute the log likelihood loss
             llh = log_likelihood(gen, type='Gaussian')
-            # print(llh.shape)
             loss = -llh.mean()-logdet
-            
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -152,10 +170,10 @@ def train(model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test
                 p.data.clamp_(-1, 1)
                 
             # adjust_learning_rate(optimizer, epoch, lr, epochs)
-
+        print(epoch, 'loss: ', loss.item())
+        
         if epoch % pgap == 0:
-            print(epoch, 'loss: ', loss.item())
-      
+            
             model.eval()
 
             # test set splt
@@ -167,15 +185,16 @@ def train(model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test
             z = torch.randn(data_test.shape[0], data_test.shape[1]).to(device)
             gen_test = model.inverse(z, cond_test)
             re_data = torch.cat((gen_test, cond_test), dim=1)
-            
             re_data = re_data.detach()
-            save_path = 'Oh, no path :), but does not matter, we do not save the figure here.'
-            plot_figure(re_data, scaler, cond_dim, save_path)
+            save_path = path + '/FCPflow_generated.png'
+            plot_figure(pre, re_data, scaler, cond_dim, save_path)
             
-            # re_data = scaler.inverse_transform(re_data)
-            # orig_data = scaler.inverse_transform(pre[:cond_test.shape[0],:].detach().numpy())
-
-
+            # save the model
+            if loss.item() < loss_mid:
+                save_path = path + '/FCPflow_model.pth'
+                torch.save(model.state_dict(), save_path)
+                loss_mid = loss.item()
+            
             model.train()
         
 
