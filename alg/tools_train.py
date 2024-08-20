@@ -1,11 +1,11 @@
 # import models_fctflow as fctf
 from torch.utils.data import DataLoader, TensorDataset
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
 torch.set_default_dtype(torch.float64)
-import wandb
+# import wandb
 from scipy.stats import energy_distance
 import pandas as pd
 from scipy.stats import kendalltau
@@ -21,7 +21,12 @@ def create_data_loader(numpy_array, batch_size=32, shuffle=True):
     Returns:
     DataLoader: A PyTorch DataLoader containing the input data.
     """ 
-    # scalr the data
+    # check if nan exists in the data, if nan drop
+    if np.isnan(numpy_array).any():
+        print('There are nan in the data, drop them')
+        numpy_array = numpy_array[~np.isnan(numpy_array).any(axis=1)]
+
+    # scalr the 
     scaler = StandardScaler()
     numpy_array = scaler.fit_transform(numpy_array)
     
@@ -86,20 +91,20 @@ def calculate_autocorrelation_mse(dataset1, dataset2):
     
 def plot_figure(re_data, scaler, con_dim, path='Generated Data.png'):
     orig_data = scaler.inverse_transform(re_data.detach().numpy())
-    # print(orig_data[:, -con_dim].mean())
     cmap = plt.get_cmap('RdBu_r')
     fig, ax = plt.subplots()
     
     if con_dim > 0:
-        for i, condition in zip(orig_data[:,:-con_dim], orig_data[:, -con_dim]):
+        _cond = orig_data[:,:-con_dim].sum(axis=1)
+        for i, condition in zip(orig_data[:,:-con_dim], _cond):
             # Convert the condition into a color
-            color = cmap((condition - orig_data[:, -con_dim].min()) /
-                            (orig_data[:, -con_dim].max() - orig_data[:, -con_dim].min()))
-            ax.plot(i, color=color)
+            color = cmap((condition - _cond .min()) /
+                            (_cond .max() - _cond .min()))
+            ax.plot(i, color=color, alpha=0.1)
             
         # Add a colorbar
         sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(
-            vmin=orig_data[:, -con_dim].min(), vmax=orig_data[:, -con_dim].max()))
+            vmin=_cond .min(), vmax=_cond .max()))
         sm.set_array([])
         cbar = plt.colorbar(sm, ax=ax)
         cbar.set_label('Condition Value scaled',
@@ -107,8 +112,9 @@ def plot_figure(re_data, scaler, con_dim, path='Generated Data.png'):
         plt.show()
     else:
         for i in orig_data:
-            ax.plot(i, color='blue' , alpha=0.5)
+            ax.plot(i, color='blue' , alpha=0.1)
         plt.show()
+        
     
 def adjust_learning_rate(optimizer, epoch, initial_lr, epochs):
     lr = initial_lr
@@ -120,15 +126,15 @@ def adjust_learning_rate(optimizer, epoch, initial_lr, epochs):
     
     
 # define a function to train the model
-def train(model, train_loader, optimizer, epochs, cond_dim ,device, scaler, lr, test_set, pgap=1000):
+def train(model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, pgap=1000):
     model.train()
     for epoch in range(epochs):
         for _, data in enumerate(train_loader):
-            # print(data)
-            pre = data[0].to(device) + torch.randn_like(data[0].to(device))/(256)
+            pre = data[0].to(device) # + torch.randn_like(data[0].to(device))/(256)
+            
             # split the data into data and conditions
             cond = pre[:,-cond_dim:]
-            data = pre[:,:-cond_dim] #+ torch.rand_like(data[:,:-cond_dim])/(256) 
+            data = pre[:,:-cond_dim] # + torch.rand_like(data[:,:-cond_dim])/(256) 
             
             gen, logdet = model(data, cond)
             
@@ -145,35 +151,33 @@ def train(model, train_loader, optimizer, epochs, cond_dim ,device, scaler, lr, 
             for p in model.parameters():
                 p.data.clamp_(-1, 1)
                 
-       
-        adjust_learning_rate(optimizer, epoch, lr, epochs)
-      
-        if epoch % pgap == 0:
+            # adjust_learning_rate(optimizer, epoch, lr, epochs)
 
+        if epoch % pgap == 0:
             print(epoch, 'loss: ', loss.item())
+      
             model.eval()
+
+            # test set splt
+            pre = next(iter(test_loader))[0].to(device)
+            cond_test = pre[:,-cond_dim:]
+            data_test = pre[:,:-cond_dim]
             
             # plot the generated data
-            z = torch.randn(cond.shape[0], 96).to(device)
-            cond_test = cond
+            z = torch.randn(data_test.shape[0], data_test.shape[1]).to(device)
             gen_test = model.inverse(z, cond_test)
             re_data = torch.cat((gen_test, cond_test), dim=1)
-            re_data = re_data.detach().cpu()
+            
+            re_data = re_data.detach()
             save_path = 'Oh, no path :), but does not matter, we do not save the figure here.'
             plot_figure(re_data, scaler, cond_dim, save_path)
             
-            re_data = scaler.inverse_transform(re_data)
-            orig_data = scaler.inverse_transform(pre[:cond_test.shape[0],:].detach().numpy())
-            
-            data_loss = energy_distance(re_data.reshape(-1), orig_data.reshape(-1))
-            corr_loss = calculate_autocorrelation_mse(re_data[:,:-cond_dim], orig_data[:,:-cond_dim])
-            
-            print('Energy distance: ', data_loss, 'MSE.A: ', corr_loss)
+            # re_data = scaler.inverse_transform(re_data)
+            # orig_data = scaler.inverse_transform(pre[:cond_test.shape[0],:].detach().numpy())
+
 
             model.train()
-            
-
-
+        
 
 def compute_quantile(pre_data):
     q = np.arange(0.01, 1, 0.01)

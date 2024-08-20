@@ -1,4 +1,3 @@
-#%%
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
@@ -109,13 +108,13 @@ class Simple1DfullConvNet(nn.Module):
 
 
 class ConditionalAffineCouplingLayer(nn.Module):
-    def __init__(self, net_type, sfactor, input_dim, hidden_dim, condition_dim, output_dim):
+    def __init__(self, sfactor, input_dim, hidden_dim, condition_dim, output_dim):
         super(ConditionalAffineCouplingLayer, self).__init__()
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.output_dim = output_dim
         self.condition_dim = condition_dim
-        self.net_type = net_type
+        # self.net_type = net_type
         self.sfactor = sfactor
 
         # Conditional scale and translation networks
@@ -130,16 +129,16 @@ class ConditionalAffineCouplingLayer(nn.Module):
         hidden_channel = self.hidden_dim
         out_channel = int(self.output_dim/2)
        
-        if self.net_type == 'fullconv':
-            return Simple1DfullConvNet(in_channel, hidden_channel, out_channel, True)
+        # if self.net_type == 'fullconv':
+        return Simple1DfullConvNet(in_channel, hidden_channel, out_channel, True)
         
     def _create_conditional_network2(self):
         # Network that accepts both input and condition
         in_channel = int(self.input_dim/2)+self.condition_dim
         hidden_channel = self.hidden_dim
         out_channel = int(self.output_dim/2)
-        if self.net_type == 'fullconv':
-            return Simple1DfullConvNet(in_channel, hidden_channel, out_channel, True)
+        # if self.net_type == 'fullconv':
+        return Simple1DfullConvNet(in_channel, hidden_channel, out_channel, True)
     
     def _positional_encoding(self, x):
         length = x.shape[1]
@@ -170,7 +169,6 @@ class ConditionalAffineCouplingLayer(nn.Module):
         x2[:,0::2] = x11
         x2[:,1::2] = x12_exp
         log_det_1 = log_det_exp_1# + log_det_trans_1
-        
 
         # Second Affine Transformation with mask2
         x21 = x2[:,0::2]
@@ -223,7 +221,7 @@ class ConditionalAffineCouplingLayer(nn.Module):
     
         
 class FCPflowblock(nn.Module): # Fully convolutional time Flow Block
-    def __init__(self, num_channels, net_type, sfactor, hidden_dim, condition_dim):
+    def __init__(self, num_channels, sfactor, hidden_dim, condition_dim):
         super(FCPflowblock, self).__init__()
         self.num_channels = num_channels
         self.sfactor = sfactor
@@ -231,12 +229,12 @@ class FCPflowblock(nn.Module): # Fully convolutional time Flow Block
         self.hidden_dim = hidden_dim
         self.output_dim = num_channels
         self.condition_dim = condition_dim
-        self.net_type = net_type
+        # self.net_type = net_type
         
         # define the layers
         self.actnorm = InvertibleNorm(self.num_channels)
         self.inv_conv = InvertibleWConv(self.num_channels)
-        self.coupling_layer = ConditionalAffineCouplingLayer(self.net_type, self.sfactor, self.input_dim, self.hidden_dim, self.condition_dim, self.output_dim)
+        self.coupling_layer = ConditionalAffineCouplingLayer(self.sfactor, self.input_dim, self.hidden_dim, self.condition_dim, self.output_dim)
 
     def forward(self, x, condition):
         # reshape x to (batch_size, num_channels, 1)
@@ -262,34 +260,42 @@ class FCPflowblock(nn.Module): # Fully convolutional time Flow Block
     
 
 class FCPflow(nn.Module): # Fully convolutional time flow
-    def __init__(self, num_blocks ,num_channels, net_type, sfactor, hidden_dim, condition_dim):
+    def __init__(self, num_blocks ,num_channels, sfactor, hidden_dim, condition_dim):
         super().__init__()
         self.num_blocks = num_blocks
         self.num_channels = num_channels
-        self.net_type = net_type
+        # self.net_type = net_type
         self.sfactor = sfactor
         self.input_dim = num_channels
         self.hidden_dim = hidden_dim
         self.output_dim = num_channels
         self.condition_dim = condition_dim
         
-        self.blocks = nn.ModuleList([FCPflowblock(self.num_channels, self.net_type,
+        self.blocks = nn.ModuleList([FCPflowblock(self.num_channels,
                                                   self.sfactor, self.hidden_dim,
                                                   self.condition_dim) for _ in range(self.num_blocks)])
-        # self.Tahhlayer = Tanhlayer()
-        
     def forward(self, x, condition):
         log_det = 0
         for block in self.blocks:
             x, log_det1 = block(x, condition)
             log_det += log_det1
-        # x, log_det_tahn = self.Tahhlayer(x)
-        return x, log_det  # + log_det_tahn
+        return x, log_det 
     
     def inverse(self, y, condition):
-        # y = self.Tahhlayer.inverse(y)
         for block in reversed(self.blocks):
             y = block.inverse(y, condition)
         return y
-   
+
+
+if __name__ == '__main__':
+    # check the model
+    model = FCPflow(2, 48, 0.3, 48, 48)
+    x = torch.randn(64, 48)
+
+    condition = torch.randn(64, 48)
+    y, log_det = model(x, condition)
+    x_re = model.inverse(y, condition)
+    print('x: ', x.shape)
+    print('y: ', y.shape)
+    
 
