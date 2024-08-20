@@ -3,7 +3,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
-# import wandb
+import wandb
 # from scipy.stats import energy_distance
 # import pandas as pd
 from scipy.stats import kendalltau
@@ -171,7 +171,7 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
                 
             # adjust_learning_rate(optimizer, epoch, lr, epochs)
         print(epoch, 'loss: ', loss.item())
-        
+        wandb.log({'loss': loss.item()})
         if epoch % pgap == 0:
             
             model.eval()

@@ -1,2 +1,7 @@
 alg\__pycache__\
 .venv
+
+
+# ignore model files and figures
+exp/uncond_rlp_generation/exp_ge/FCPflow_model.pth
+exp/uncond_rlp_generation/exp_ge/FCPflow_generated.png

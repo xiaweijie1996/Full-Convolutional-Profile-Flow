@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import sys
 _parent_path =os.path.join(os.path.dirname(__file__), '..','..','..')
@@ -37,11 +39,10 @@ print('number of parameters: ', sum(p.numel() for p in model.parameters() if p.r
 optimizer = torch.optim.Adam(model.parameters(), lr=config['FCPflow']['lr'], weight_decay=config['FCPflow']['w_decay'])
 
 # define the wandb
-# wandb.init(project="fctflow_ge_win_24122023")
-# wandb.watch(model)
-# wandb.config.update({"num_blocks": num_blocks, "sfactor": sfactor, "hidden_dim": hidden_dim, "lr": lr, "w_decay": w_decay})
+wandb.init(project="fcpflow_ge")
+wandb.watch(model)
 
 # train the model
 path = os.path.join(_parent_path, 'exp', 'uncond_rlp_generation', 'exp_ge')
-tl.train(path, model, dataloader, optimizer, 400001, config['FCPflow']['condition_dim'], device, scaler, dataloader, 100)
+tl.train(path, model, dataloader, optimizer, 4000001, config['FCPflow']['condition_dim'], device, scaler, dataloader, 100)
 
