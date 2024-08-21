@@ -145,7 +145,7 @@ def adjust_learning_rate(optimizer, epoch, initial_lr, epochs):
     
     
 # define a function to train the model
-def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, pgap=1000):
+def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, pgap=1000, _wandb=True):
     model.train()
     loss_mid = 0
     for epoch in range(epochs):
@@ -171,7 +171,8 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
                 
             # adjust_learning_rate(optimizer, epoch, lr, epochs)
         print(epoch, 'loss: ', loss.item())
-        wandb.log({'loss': loss.item()})
+        if _wandb:
+            wandb.log({'loss': loss.item()})
         if epoch % pgap == 0:
             
             model.eval()

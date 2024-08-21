@@ -18,15 +18,15 @@ import alg.tools_train as tl
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # import the configuration
-with open(os.path.join(_parent_path,'exp/con_rlp_generation/exp_uk/config_uk.yaml')) as file:
+with open(os.path.join(_parent_path, 'exp/con_rlp_generation/exp_uk/config_uk.yaml')) as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
         
 # define the data loader
 data_path = os.path.join(_parent_path, 'data', 'uk_data_cleaned_ind_train.csv')
-np_array_train = pd.read_csv(data_path).values
+# read the data from the second column to the end
+np_array_train = pd.read_csv(data_path, index_col=0).values
 data_path = os.path.join(_parent_path, 'data', 'uk_data_cleaned_ind_test.csv')
-np_array_test = pd.read_csv(data_path).values
-
+np_array_test = pd.read_csv(data_path,  index_col=0).values
 
 # stack one extra column of zeros to the data as the condition
 dataloader_train, scaler = tl.create_data_loader(np_array_train, config['FCPflow']['batch_size'], True)
@@ -43,10 +43,10 @@ print('number of parameters: ', sum(p.numel() for p in model.parameters() if p.r
 optimizer = torch.optim.Adam(model.parameters(), lr=config['FCPflow']['lr'], weight_decay=config['FCPflow']['w_decay'])
 
 # define the wandb
-wandb.init(project="fcpflow_ge")
-wandb.watch(model)
+# wandb.init(project="fcpflow_uk")
+# wandb.watch(model)
 
 # train the model
-path = os.path.join(_parent_path, 'exp', 'uncond_rlp_generation', 'exp_ge')
-tl.train(path, model, dataloader_train, optimizer, 4000001, config['FCPflow']['condition_dim'], device, scaler, dataloader_test, 100)
+path = os.path.join(_parent_path, 'exp/con_rlp_generation/exp_uk')
+tl.train(path, model, dataloader_train, optimizer, 4000001, config['FCPflow']['condition_dim'], device, scaler, dataloader_test, 100, False)
 
