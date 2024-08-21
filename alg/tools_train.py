@@ -145,7 +145,7 @@ def adjust_learning_rate(optimizer, epoch, initial_lr, epochs):
     
     
 # define a function to train the model
-def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, pgap=1000, _wandb=True):
+def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True):
     model.train()
     loss_mid = 0
     for epoch in range(epochs):
@@ -164,24 +164,41 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+            scheduler.step()
             
             # weight clipping
             for p in model.parameters():
                 p.data.clamp_(-1, 1)
                 
             # adjust_learning_rate(optimizer, epoch, lr, epochs)
+        
+        # ----------------- moniter loss -----------------
         print(epoch, 'loss: ', loss.item())
         if _wandb:
             wandb.log({'loss': loss.item()})
+        # ----------------- moniter loss -----------------
+            
+        # ----------------- test the model -----------------
+        model.eval()
+        
+        # test the model
+        pre = next(iter(test_loader))[0].to(device)
+        cond_test = pre[:,-cond_dim:]
+        data_test = pre[:,:-cond_dim]
+        
+        gen_test, logdet_test = model(data_test, cond_test)
+        llh_test = log_likelihood(gen_test, type='Gaussian')
+        loss_test = -llh_test.mean()-logdet_test
+        
+        # save the model
+        if loss_test.item() < loss_mid:
+            save_path = path + '/FCPflow_model.pth'
+            torch.save(model.state_dict(), save_path)
+            loss_mid = loss_test.item()
+        # ----------------- test the model -----------------
+        
+        # ----------------- plot the generated data -----------------
         if epoch % pgap == 0:
-            
-            model.eval()
-
-            # test set splt
-            pre = next(iter(test_loader))[0].to(device)
-            cond_test = pre[:,-cond_dim:]
-            data_test = pre[:,:-cond_dim]
-            
             # plot the generated data
             z = torch.randn(data_test.shape[0], data_test.shape[1]).to(device)
             gen_test = model.inverse(z, cond_test)
@@ -189,14 +206,8 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
             re_data = re_data.detach()
             save_path = path + '/FCPflow_generated.png'
             plot_figure(pre, re_data, scaler, cond_dim, save_path)
-            
-            # save the model
-            if loss.item() < loss_mid:
-                save_path = path + '/FCPflow_model.pth'
-                torch.save(model.state_dict(), save_path)
-                loss_mid = loss.item()
-            
-            model.train()
+        # ----------------- plot the generated data -----------------
+        model.train()
         
 
 def compute_quantile(pre_data):
