@@ -66,7 +66,32 @@ class InvertibleWConv(nn.Module):
         w_inv = torch.inverse(self.w)
         return F.conv1d(y, w_inv.view(self.num_channels, self.num_channels, 1))
 
-            
+class InvertibleWConv_1(nn.Module):
+    def __init__(self, num_channels):
+        super(InvertibleWConv_1, self).__init__()
+        self.num_channels = num_channels
+
+        # Initialize weights with a random rotation matrix
+        w_init = torch.qr(torch.randn(num_channels, num_channels))[0]
+        self.w = nn.Parameter(w_init)
+
+    def forward(self, input):
+        device = input.device
+        # batch matrix multiplication
+        input = input.view(-1, 1, self.num_channels)
+        out = torch.bmm(input, self.w.unsqueeze(0).repeat(input.shape[0], 1, 1))
+        log_det = torch.slogdet(self.w)[1]
+        out = out.view(-1, self.num_channels, 1)
+        return out, log_det
+
+    def inverse(self, y):
+        # Compute the inverse of the weights
+        y = y.view(-1, 1, self.num_channels)
+        w_inv = torch.inverse(self.w)
+        out = torch.bmm(y, w_inv.unsqueeze(0).repeat(y.shape[0], 1, 1))
+        out = out.view(-1, self.num_channels, 1)
+        return out
+          
 class Simple1DfullConvNet(nn.Module):
     def __init__(self, in_c, h_c, out_c, linear = False):
         super().__init__()
@@ -297,13 +322,27 @@ class FCPflow(nn.Module): # Fully convolutional time flow
 
 if __name__ == '__main__':
     # check the model
-    model = FCPflow(2, 48, 0.3, 48, 48).to('cuda')  
-    x = torch.randn(64, 48).to('cuda')
+    # model = FCPflow(2, 48, 0.3, 48, 48).to('cuda')  
+    # x = torch.randn(64, 48).to('cuda')
 
-    condition = torch.randn(64, 48).to('cuda')
-    y, log_det = model(x, condition)
-    x_re = model.inverse(y, condition)
-    print('x: ', x.shape)
-    print('y: ', y.shape)
+    # condition = torch.randn(64, 48).to('cuda')
+    # y, log_det = model(x, condition)
+    # x_re = model.inverse(y, condition)
+    # print('x: ', x.shape)
+    # print('y: ', y.shape)
+    
+    # check here the model
+    x = torch.randn(200, 96, 1)
+    inv_layer1 = InvertibleWConv(96)
+    inv_layer2 = InvertibleWConv_1(96)
+    inv_layer2.w = inv_layer1.w
+    y_1, log_det1 = inv_layer1(x)
+    y_2, log_det2 = inv_layer2(x)
+    x_re_1 = inv_layer1.inverse(y_1)
+    print('x, x_re_1 difference: ', torch.norm(x - x_re_1))
+    x_re_2 = inv_layer2.inverse(y_2)
+    print('x, x_re_2 difference: ', torch.norm(x - x_re_2))
+
+  
     
 

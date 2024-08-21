@@ -2,5 +2,5 @@ matplotlib
 pandas
 numpy
 scikit-learn == 1.2.2
-torch == 2.1.0
+torch == torch==2.2.2
 scipy == 1.11.4
