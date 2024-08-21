@@ -164,7 +164,8 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            scheduler.step()
+            if scheduler is not None:
+                scheduler.step()
             
             # weight clipping
             for p in model.parameters():

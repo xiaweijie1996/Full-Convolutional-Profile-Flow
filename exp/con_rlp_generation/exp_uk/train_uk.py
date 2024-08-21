@@ -40,8 +40,10 @@ model = fcpf.FCPflow(config['FCPflow']['num_blocks'], config['FCPflow']['num_cha
 print('number of parameters: ', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
 # define the optimizer
-optimizer = torch.optim.Adam(model.parameters(), lr=config['FCPflow']['lr'], weight_decay=config['FCPflow']['w_decay'])
-scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.00001, max_lr=0.001)
+optimizer = torch.optim.Adam(model.parameters(), lr=config['FCPflow']['lr_max'], weight_decay=config['FCPflow']['w_decay'])
+scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, step_size_up=config['FCPflow']['lr_step_size'], 
+                                              base_lr=config['FCPflow']['lr_min'], max_lr=config['FCPflow']['lr_max'],
+                                              cycle_momentum=False )
 
 # define the wandb
 wandb.init(project="fcpflow_uk")

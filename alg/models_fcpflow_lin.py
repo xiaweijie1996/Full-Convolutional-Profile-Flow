@@ -31,8 +31,10 @@ class InvertibleNorm(nn.Module):
         else:
             # Normalize input using running statistics during evaluation
             normalized_input = (input - self.running_mean.to(device)) / self.running_std.to(device)
+            mean = torch.mean(input, dim=[0, 2], keepdim=True)
+            std = torch.std(input, dim=[0, 2], keepdim=True) + 1e-10
 
-        # log-determinant of the Jacobian
+        # log-determinant of the Jacobian)
         self.scale = 1 / (std + 1e-10)
         log_det = (
             torch.sum(torch.log(torch.abs(self.scale.squeeze() + 1e-10)))
