@@ -5,8 +5,9 @@ alg/__pycache__/
 # ignore model files and figures
 exp/uncond_rlp_generation/exp_ge/FCPflow_model.pth
 exp/uncond_rlp_generation/exp_ge/FCPflow_generated.png
+exp/uncond_rlp_generation/exp_ge/train_ge_script.sh
 exp/con_rlp_generation/exp_uk/FCPflow_model.pth
 exp/con_rlp_generation/exp_uk/FCPflow_generated.png
-
+exp/con_rlp_generation/exp_uk/train_uk_script.sh
 # ingore wandb files
 wandb/
