@@ -43,10 +43,10 @@ scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, step_size_up=config['FC
 
 
 # define the wandb
-wandb.init(project="fcpflow_ge")
-wandb.watch(model)
+# wandb.init(project="fcpflow_ge")
+# wandb.watch(model)
 
 # train the model
 path = os.path.join(_parent_path, 'exp', 'uncond_rlp_generation', 'exp_ge')
-tl.train(path, model, dataloader, optimizer, 4000001, config['FCPflow']['condition_dim'], device, scaler, dataloader, scheduler, 100, True)
+tl.train(path, model, dataloader, optimizer, 4000001, config['FCPflow']['condition_dim'], device, scaler, dataloader, scheduler, 100, False)
 

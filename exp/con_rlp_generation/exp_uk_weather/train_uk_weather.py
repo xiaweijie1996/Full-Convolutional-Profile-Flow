@@ -18,14 +18,14 @@ import alg.tools_train as tl
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # import the configuration
-with open(os.path.join(_parent_path, 'exp/con_rlp_generation/exp_uk/config_uk.yaml')) as file:
+with open(os.path.join(_parent_path, 'exp/con_rlp_generation/exp_uk/config_uk_weather.yaml')) as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
         
 # define the data loader
-data_path = os.path.join(_parent_path, 'data', 'uk_data_cleaned_ind_train.csv')
+data_path = os.path.join(_parent_path, 'data/uk_data_cleaned_ind_weather_train.csv')
 # read the data from the second column to the end
 np_array_train = pd.read_csv(data_path, index_col=0).values
-data_path = os.path.join(_parent_path, 'data', 'uk_data_cleaned_ind_test.csv')
+data_path = os.path.join(_parent_path, 'data/uk_data_cleaned_ind_weather_test.csv')
 np_array_test = pd.read_csv(data_path,  index_col=0).values
 
 # stack one extra column of zeros to the data as the condition
@@ -50,6 +50,6 @@ wandb.init(project="fcpflow_uk")
 wandb.watch(model)
 
 # train the model
-path = os.path.join(_parent_path, 'exp/con_rlp_generation/exp_uk')
+path = os.path.join(_parent_path, 'exp/con_rlp_generation/exp_uk_weather')
 tl.train(path, model, dataloader_train, optimizer, 4000001, config['FCPflow']['condition_dim'], device, scaler, dataloader_test, scheduler, 100, True)
 

@@ -150,6 +150,7 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
     loss_mid = 0
     for epoch in range(epochs):
         for _, data in enumerate(train_loader):
+            model.train()
             pre = data[0].to(device) # + torch.randn_like(data[0].to(device))/(256)
             
             # split the data into data and conditions
@@ -162,14 +163,14 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
             llh = log_likelihood(gen, type='Gaussian')
             loss = -llh.mean()-logdet
             optimizer.zero_grad()
-            loss.backward()
+            loss.backward(retain_graph=True)
             optimizer.step()
             if scheduler is not None:
                 scheduler.step()
             
-            # weight clipping
-            for p in model.parameters():
-                p.data.clamp_(-1, 1)
+            # # weight clipping
+            # for p in model.parameters():
+            #     p.data.clamp_(-1, 1)
                 
             # adjust_learning_rate(optimizer, epoch, lr, epochs)
         
@@ -208,7 +209,6 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
             save_path = path + '/FCPflow_generated.png'
             plot_figure(pre, re_data, scaler, cond_dim, save_path)
         # ----------------- plot the generated data -----------------
-        model.train()
         
 
 def compute_quantile(pre_data):

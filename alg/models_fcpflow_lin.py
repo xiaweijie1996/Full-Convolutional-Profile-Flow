@@ -8,36 +8,18 @@ class InvertibleNorm(nn.Module):
     def __init__(self, num_channels):
         super(InvertibleNorm, self).__init__()
         self.num_channels = num_channels
-        # Initialize running mean and standard deviation
-        self.register_buffer('running_mean', torch.zeros(1, num_channels, 1))
-        self.register_buffer('running_std', torch.ones(1, num_channels, 1))
-        self.initialized = False
-        self.momentum = 0.1
-
-    def forward(self, input):
-        device = input.device
         
-        if self.training:
-            # Calculate mean and std dev for the current batch
-            mean = torch.mean(input, dim=[0, 2], keepdim=True)
-            std = torch.std(input, dim=[0, 2], keepdim=True) + 1e-10
-
-            # Normalize input using calculated mean and std dev
-            normalized_input = (input - mean) / std
-
-            # Update running statistics
-            self.running_mean = (1 - self.momentum) * self.running_mean.to(device) + self.momentum * mean
-            self.running_std = (1 - self.momentum) * self.running_std.to(device) + self.momentum * std
-        else:
-            # Normalize input using running statistics during evaluation
-            normalized_input = (input - self.running_mean.to(device)) / self.running_std.to(device)
-            mean = torch.mean(input, dim=[0, 2], keepdim=True)
-            std = torch.std(input, dim=[0, 2], keepdim=True) + 1e-10
-
+    def forward(self, input):
+        self.running_mean = torch.mean(input, dim=[0, 2], keepdim=True)
+        self.running_std = torch.std(input, dim=[0, 2], keepdim=True)
+        
+        # Normalize input using calculated mean and std dev
+        normalized_input = (input - self.running_mean) / (self.running_std)
+        
         # log-determinant of the Jacobian)
-        self.scale = 1 / (std + 1e-10)
+        self.scale = 1 / (self.running_std)
         log_det = (
-            torch.sum(torch.log(torch.abs(self.scale.squeeze() + 1e-10)))
+            torch.sum(torch.log(self.scale.squeeze()))
         )
         return normalized_input, log_det
 
@@ -46,28 +28,8 @@ class InvertibleNorm(nn.Module):
         
         # Use running_mean and running_std for the inverse normalization
         return (output * self.running_std.to(device)) + self.running_mean.to(device)
-    
 
-# class InvertibleWConv(nn.Module):
-#     def __init__(self, num_channels):
-#         super(InvertibleWConv, self).__init__()
-#         self.num_channels = num_channels
-
-#         # Initialize weights with a random rotation matrix
-#         w_init = torch.qr(torch.randn(num_channels, num_channels))[0]
-#         self.w = nn.Parameter(w_init)
-
-#     def forward(self, input):
-#         device = input.device
-#         out = F.conv1d(input, self.w.view(self.num_channels, self.num_channels, 1).to(device))
-#         log_det = torch.slogdet(self.w)[1]
-#         return out, log_det
-
-#     def inverse(self, y):
-#         # Compute the inverse of the weights
-#         w_inv = torch.inverse(self.w)
-#         return F.conv1d(y, w_inv.view(self.num_channels, self.num_channels, 1))
-
+# can I compare this with a linear layer?
 class InvertibleWConv(nn.Module):
     def __init__(self, num_channels):
         super(InvertibleWConv, self).__init__()
@@ -94,8 +56,7 @@ class InvertibleWConv(nn.Module):
         out = torch.bmm(y, w_inv.unsqueeze(0).repeat(y.shape[0], 1, 1).to(device))
         out = out.view(-1, self.num_channels, 1)
         return out
-
-          
+    
 class Simple1DfullConvNet(nn.Module):
     def __init__(self, in_c, h_c, out_c, linear = False):
         super().__init__()
@@ -103,7 +64,7 @@ class Simple1DfullConvNet(nn.Module):
         self.h_c = h_c
         self.out_c = out_c
         self.linear = linear
-        self.bias = True
+        self.bias = False
         self.model = nn.Sequential( 
             nn.Linear(in_features=self.in_c, out_features=self.h_c, bias=self.bias),
             nn.BatchNorm1d(self.h_c),
@@ -140,7 +101,6 @@ class Simple1DfullConvNet(nn.Module):
                 x = self.linear_model(x)
                 return x
 
-
 class ConditionalAffineCouplingLayer(nn.Module):
     def __init__(self, sfactor, input_dim, hidden_dim, condition_dim, output_dim):
         super(ConditionalAffineCouplingLayer, self).__init__()
@@ -162,8 +122,6 @@ class ConditionalAffineCouplingLayer(nn.Module):
         in_channel = int(self.input_dim/2)+self.condition_dim
         hidden_channel = self.hidden_dim
         out_channel = int(self.output_dim/2)
-       
-        # if self.net_type == 'fullconv':
         return Simple1DfullConvNet(in_channel, hidden_channel, out_channel, True)
         
     def _create_conditional_network2(self):
@@ -171,7 +129,6 @@ class ConditionalAffineCouplingLayer(nn.Module):
         in_channel = int(self.input_dim/2)+self.condition_dim
         hidden_channel = self.hidden_dim
         out_channel = int(self.output_dim/2)
-        # if self.net_type == 'fullconv':
         return Simple1DfullConvNet(in_channel, hidden_channel, out_channel, True)
     
     def _positional_encoding(self, x):
@@ -185,7 +142,7 @@ class ConditionalAffineCouplingLayer(nn.Module):
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
         
-        return pe.reshape(1, length)
+        return pe.reshape(1, length)*0.05
         
     def forward(self, x, condition):
         # Device 
@@ -205,7 +162,7 @@ class ConditionalAffineCouplingLayer(nn.Module):
         x2 = torch.empty_like(x)
         x2[:,0::2] = x11
         x2[:,1::2] = x12_exp
-        log_det_1 = log_det_exp_1# + log_det_trans_1
+        log_det_1 = log_det_exp_1 # + log_det_trans_1
 
         # Second Affine Transformation with mask2
         x21 = x2[:,0::2]
@@ -294,7 +251,6 @@ class FCPflowblock(nn.Module): # Fully convolutional time Flow Block
         x = self.actnorm.inverse(x)
         x = x.squeeze(2)
         return x
-    
 
 class FCPflow(nn.Module): # Fully convolutional time flow
     def __init__(self, num_blocks ,num_channels, sfactor, hidden_dim, condition_dim):
@@ -326,14 +282,15 @@ class FCPflow(nn.Module): # Fully convolutional time flow
 
 if __name__ == '__main__':
     # check the model
-    # model = FCPflow(2, 48, 0.3, 48, 48).to('cuda')  
-    # x = torch.randn(64, 48).to('cuda')
+    model = FCPflow(8, 48, 0.3, 48, 48).to('cuda')  
+    x = torch.randn(604, 48).to('cuda')
 
-    # condition = torch.randn(64, 48).to('cuda')
-    # y, log_det = model(x, condition)
-    # x_re = model.inverse(y, condition)
-    # print('x: ', x.shape)
-    # print('y: ', y.shape)
+    condition = torch.randn(604, 48).to('cuda')
+    y, log_det = model(x, condition)
+    x_re = model.inverse(y, condition)
+    print('x: ', x.shape)
+    print('y: ', y.shape)
+    print('difference: ', torch.norm(x - x_re))
     
     # check here the model
     # x = torch.randn(200, 96, 1)
@@ -346,7 +303,6 @@ if __name__ == '__main__':
     # print('x, x_re_1 difference: ', torch.norm(x - x_re_1))
     # x_re_2 = inv_layer2.inverse(y_2)
     # print('x, x_re_2 difference: ', torch.norm(x - x_re_2))
-    pass
-  
     
+    pass
 

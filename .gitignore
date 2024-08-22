@@ -12,3 +12,6 @@ exp/con_rlp_generation/exp_uk/train_uk_script.sh
 
 # ingore wandb files
 wandb/
+
+# ignore useless files
+alg/trash_function.py
