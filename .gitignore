@@ -9,6 +9,10 @@ exp/uncond_rlp_generation/exp_ge/train_ge_script.sh
 exp/con_rlp_generation/exp_uk/FCPflow_model.pth
 exp/con_rlp_generation/exp_uk/FCPflow_generated.png
 exp/con_rlp_generation/exp_uk/train_uk_script.sh
+exp/cond_rlp_generation/exp_uk_weather/FCPflow_generated.png
+exp/cond_rlp_generation/exp_uk_weather/FCPflow_model.pth
+exp/prediction/usa/FCPflow_generated.png
+exp/prediction/usa/FCPflow_model.pth
 
 # ingore wandb files
 wandb/
