@@ -51,5 +51,6 @@ wandb.watch(model)
 
 # train the model
 path = os.path.join(_parent_path, 'exp/cond_rlp_generation/exp_uk')
-tl.train(path, model, dataloader_train, optimizer, 4000001, config['FCPflow']['condition_dim'], device, scaler, dataloader_test, scheduler, 100, True)
+tl.train(path, model, dataloader_train, optimizer, 4000001, config['FCPflow']['condition_dim'], 
+         device, scaler, dataloader_test, scheduler, 100, True)
 

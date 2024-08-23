@@ -6,13 +6,25 @@ alg/__pycache__/
 exp/uncond_rlp_generation/exp_ge/FCPflow_model.pth
 exp/uncond_rlp_generation/exp_ge/FCPflow_generated.png
 exp/uncond_rlp_generation/exp_ge/train_ge_script.sh
+
 exp/con_rlp_generation/exp_uk/FCPflow_model.pth
 exp/con_rlp_generation/exp_uk/FCPflow_generated.png
 exp/con_rlp_generation/exp_uk/train_uk_script.sh
 exp/cond_rlp_generation/exp_uk_weather/FCPflow_generated.png
 exp/cond_rlp_generation/exp_uk_weather/FCPflow_model.pth
+exp/cond_rlp_generation/exp_aus/FCPflow_generated.png
+exp/cond_rlp_generation/exp_aus/FCPflow_model.pth
+exp/cond_rlp_generation/exp_nl/FCPflow_generated.png
+exp/cond_rlp_generation/exp_nl/FCPflow_model.pth
+exp/cond_rlp_generation/exp_usa/FCPflow_generated.png
+exp/cond_rlp_generation/exp_usa/FCPflow_model.pth
+
 exp/prediction/usa/FCPflow_generated.png
 exp/prediction/usa/FCPflow_model.pth
+exp/prediction/uk/FCPflow_generated.png
+exp/prediction/uk/FCPflow_model.pth
+exp/prediction/nl/FCPflow_generated.png
+exp/prediction/nl/FCPflow_model.pth
 
 # ingore wandb files
 wandb/
