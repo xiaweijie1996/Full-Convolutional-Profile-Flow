@@ -4,10 +4,12 @@
   <img src="materials/fcpflow.png" alt="Top Bar">
 </p>
 
-Welcome to the repository containing the implementation of algorithms from the paper titled **'A Flow-Based Model for Conditional and Probabilistic Electricity Consumption Profile Generation and Prediction'**.
+Welcome to the repository containing the implementation of algorithms from the paper titled **'A Flow-Based Model for Conditional and Probabilistic Electricity Consumption Profile Generation and Prediction'**. 
 
 - We have provided detailed tutorials for you to undershtand our model, check at [Tutorials](tutorials).
 - All process data for this project are available at [Data](data).
+- To reproduce all experiments in our paper, check [Exp](exp).
+- We have provided some pre-trained models to direct test the generation results, check below.
 
 ## Tutorials
 
@@ -21,10 +23,13 @@ To get started with our models and understand how they work, we have prepared se
 
 We highly recommend going through these tutorials in the order listed above to gain a comprehensive understanding of the models and their applications. Especially **Conditional Generation** tutorial.
 
-## Code of other models
 For the code of t-Copula used in the paper, please check: [t-Copula](https://github.com/MauricioSalazare/multi-copula)
 
 For the of GAN, VAE, etc, please check: [Generative models](https://github.com/xiaweijie1996/Generative-Models-for-Customer-Profile-Generation).
+
+## How to Use Pre-trained Model to Do the Generation
+
+We will provide this soon.
 
 ## FCPFlow
 
