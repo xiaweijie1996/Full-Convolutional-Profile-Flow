@@ -33,6 +33,10 @@ For the of GAN, VAE, etc, please check: [Generative models](https://github.com/x
 
 We will provide this soon.
 
+## How to Train Your Own FCPflow
+
+We will provide this soon.
+
 ## FCPFlow Model Structure
 
 ![ffctfflow+str](https://github.com/xiaweijie1996/Full-Convolutional-Time-Series-Flow/assets/84010474/f29e1a10-0ae9-4a76-b20a-c9c1e5d781c3)
