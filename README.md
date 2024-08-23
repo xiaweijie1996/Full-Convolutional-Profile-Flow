@@ -4,7 +4,7 @@
   <img src="materials/fcpflow.png" alt="Top Bar">
 </p>
 
-Welcome to the repository containing the implementation of algorithms from the paper titled **'A Flow-Based Model for Conditional and Probabilistic Electricity Consumption Profile Generation and Prediction'**. 
+Welcome to the repository containing the implementation of algorithms from the paper titled **'A Flow-Based Model for Conditional and Probabilistic Electricity Consumption Profile Generation and Prediction'**. Our Paper is available at [Link](https://arxiv.org/abs/2405.02180).
 
 - We have provided detailed tutorials for you to undershtand our model, check at [Tutorials](tutorials).
 - All process data for this project are available at [Data](data).
