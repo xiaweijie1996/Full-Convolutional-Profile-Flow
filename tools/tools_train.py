@@ -4,10 +4,9 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 import wandb
-from scipy.stats import energy_distance
-# import pandas as pd
-from scipy.stats import kendalltau
-from sklearn.metrics import mean_squared_error
+import time
+
+from tools.evaluation_m import MMD_kernel, calculate_w_distances
 
 torch.set_default_dtype(torch.float64)
 
@@ -39,7 +38,6 @@ def create_data_loader(numpy_array, batch_size=32, shuffle=True):
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
 
     return data_loader, scaler
-
 
 def log_likelihood(x, type='Gaussian'):
     """Compute log likelihood for x under a uniform distribution in [0,1]^D.
@@ -101,7 +99,6 @@ def plot_figure(pre, re_data, scaler, con_dim, path='Generated Data Comparison.p
     plt.tight_layout()
     plt.savefig(path)
 
-
 def plot_pre(pre, re_data, scaler, con_dim, path='Generated Data Comparison.png'):
     # Inverse transform to get the original scale of the data
     orig_data_pre = scaler.inverse_transform(pre.cpu().detach().numpy())
@@ -122,11 +119,9 @@ def plot_pre(pre, re_data, scaler, con_dim, path='Generated Data Comparison.png'
     plt.savefig(path)
     plt.close()
     
-
 def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True):
     model.train()
     loss_mid = 0
-    energy_mid = 100
     for epoch in range(epochs):
         for _, data in enumerate(train_loader):
             model.train()
@@ -148,7 +143,7 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
                 scheduler.step()
             
         # ----------------- moniter loss -----------------
-        print(epoch, 'loss: ', loss.item())
+        # print(epoch, 'loss: ', loss.item())
         if _wandb:
             wandb.log({'loss': loss.item()})
         # ----------------- moniter loss -----------------
@@ -177,11 +172,6 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
         gen_test = model.inverse(z, cond_test)
         re_data = torch.cat((gen_test, cond_test), dim=1)
         re_data = re_data.detach()
-            
-        # comput energy distance
-        energy_dis = _calculate_energy_distances(data_test.cpu().detach().numpy(), gen_test.cpu().detach().numpy())
-        if _wandb:
-            wandb.log({'energy_distance': energy_dis}) 
         # ----------------- test the model -----------------
         
         # ----------------- plot the generated data -----------------
@@ -254,65 +244,58 @@ def train_pre(path, model, train_loader, optimizer, epochs, cond_dim ,device, sc
             plot_pre(pre, re_data, scaler, cond_dim, save_path)
         # ----------------- plot the generated data -----------------
 
-
-def _calculate_energy_distances(dataset1, dataset2):
-    """
-    Calculate the energy distances between two dataset.
-
-    """
-    dataset1 = np.array(dataset1).flatten()
-    dataset2 = np.array(dataset2).flatten()
-    
-    return energy_distance(dataset1, dataset2)
-
-
-def compute_quantile(pre_data):
-    q = np.arange(0.01, 1, 0.01)
-    quantile_value = np.quantile(pre_data, q, axis=0)
-    return quantile_value 
-
-
-def pinball_loss_compute(y, f, q):
-    if y >= f:
-        return (y - f) * q
-    else:
-        return (f - y) * (1 - q)
-    
-def plloss(pre_data, true_data):
-    quantile_values = compute_quantile(pre_data)
-    q = np.arange(0.01, 1, 0.01)
-    
-    loss = []
-    for i in range(len(q)):
-        ind_loss = [pinball_loss_compute(y, f, q[i]) for y, f in zip(true_data, quantile_values[i,:])]
-        loss.append(np.mean(ind_loss))
-    pinball_loss = np.mean(loss)
-    return pinball_loss
-
- 
-def kendalltau_corr(data):
-    data = np.array(data)
-    correlation_matrix = np.zeros((data.shape[1], data.shape[1]))
-    
-    for i in range(data.shape[1]):
-        for j in range(data.shape[1]):
-            correlation_matrix[i, j] = kendalltau(data[:, i], data[:, j])[0]
+def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True):
+    model.train()
+    start_time = time.time()
+    for epoch in range(epochs):
+        for _, data in enumerate(train_loader):
+            model.train()
+            pre = data[0].to(device) # + torch.randn_like(data[0].to(device))/(256)
             
-    return correlation_matrix
+            # split the data into data and conditions
+            cond = pre[:,-cond_dim:]
+            data = pre[:,:-cond_dim] # + torch.rand_like(data[:,:-cond_dim])/(256) 
+            
+            gen, logdet = model(data, cond)
+            
+            # compute the log likelihood loss
+            llh = log_likelihood(gen, type='Gaussian')
+            loss = -llh.mean()-logdet
+            optimizer.zero_grad()
+            loss.backward(retain_graph=True)
+            optimizer.step()
+            if scheduler is not None:
+                scheduler.step()
+            
+        # ----------------- test the model -----------------
+        model.eval()
+        
+        print('epoch: ', epoch, 'loss: ', loss.item())
+
+        # plot the generated data
+        z = torch.randn(data.shape[0], data.shape[1]).to(device)
+        gen_test = model.inverse(z, cond)
+        re_data = torch.cat((gen_test, cond), dim=1)
+        re_data = re_data.detach()
+        
+        orig_data_pre = scaler.inverse_transform(pre.cpu().detach().numpy())
+        orig_data_re = scaler.inverse_transform(re_data.cpu().detach().numpy())
+        
+        # comput energy distance
+        _dis = MMD_kernel(orig_data_pre, orig_data_re)
+        if _wandb:
+            wandb.log({'time': time.time()-start_time,
+                        'epoch': epoch,
+                        'MMD':_dis,
+                        'loss:': loss.item()
+                       })
+        # ----------------- test the model -----------------
+        
+        # ----------------- plot the generated data -----------------
+        if epoch % pgap ==0: 
+            save_path = path + '/FCPflow_generated.png'
+            plot_figure(pre, re_data, scaler, cond_dim, save_path)
+        # ----------------- plot the generated data -----------------
 
 
-def calculate_autocorrelation_mse(dataset1, dataset2):
-    dataset1 = np.array(dataset1)
-    dataset2 = np.array(dataset2)
-    
-    # compute the correlation matrix of data1
-    correlation_matrix1 = kendalltau_corr(dataset1)
-    
-    # compute the correlation matrix of data2
-    correlation_matrix2 = kendalltau_corr(dataset2)
-    
-    # compute the mean square error
-    mse = mean_squared_error(correlation_matrix1,correlation_matrix2)
-    
-    return mse
-    
+

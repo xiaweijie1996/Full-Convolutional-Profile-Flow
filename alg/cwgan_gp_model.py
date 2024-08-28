@@ -1,6 +1,28 @@
 import torch
 import torch.nn as nn
 
+def compute_gradient_penalty(D, cond, real_samples, fake_samples, device):
+    """Calculates the gradient penalty loss for WGAN GP"""
+    # Random weight term for interpolation between real and fake samples
+    alpha = torch.rand(real_samples.shape[0], 1).to(device)
+    # Get random interpolation between real and fake samples
+    interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
+    d_interpolates = D(interpolates, cond)
+    fake = torch.ones(real_samples.size(0), 1).to(device)
+    # Get gradient w.r.t. interpolates
+    gradients = torch.autograd.grad(
+        outputs=d_interpolates,
+        inputs=interpolates,
+        grad_outputs=fake,
+        create_graph=True,
+        retain_graph=True,
+        only_inputs=True,
+    )[0]
+    gradients = gradients.view(gradients.size(0), -1)
+    gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
+    return gradient_penalty
+
+
 # define the generator of the gan
 class Generator(nn.Module):
     def __init__(self, input_dim = 24, cond_dim = 24, hidden_dim = 12, z_dim= 12):
@@ -9,6 +31,7 @@ class Generator(nn.Module):
         self.input_dim = input_dim
         self.cond_dim = cond_dim
         self.out_scale = hidden_dim # for 15m
+        
         
         self.models = nn.Sequential(
                         
@@ -24,7 +47,7 @@ class Generator(nn.Module):
                 
                 # last layer
                 nn.Linear(self.out_scale*10, self.input_dim),
-                nn.Tanh()  
+                # nn.Tanh()  
             )
         
     def forward(self, z, conds):
@@ -63,25 +86,4 @@ class Discriminator(nn.Module):
         score = self.models(x)
         return score
 
-
-def compute_gradient_penalty(D, cond, real_samples, fake_samples, device):
-    """Calculates the gradient penalty loss for WGAN GP"""
-    # Random weight term for interpolation between real and fake samples
-    alpha = torch.rand(real_samples.shape[0], 1).to(device)
-    # Get random interpolation between real and fake samples
-    interpolates = (alpha * real_samples + ((1 - alpha) * fake_samples)).requires_grad_(True)
-    d_interpolates = D(interpolates, cond)
-    fake = torch.ones(real_samples.size(0), 1).to(device)
-    # Get gradient w.r.t. interpolates
-    gradients = torch.autograd.grad(
-        outputs=d_interpolates,
-        inputs=interpolates,
-        grad_outputs=fake,
-        create_graph=True,
-        retain_graph=True,
-        only_inputs=True,
-    )[0]
-    gradients = gradients.view(gradients.size(0), -1)
-    gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
-    return gradient_penalty
 

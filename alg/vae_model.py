@@ -1,10 +1,9 @@
 import torch
 from torch import nn
 
-
-class VAE_60m(nn.Module):
+class VAE(nn.Module):
     def __init__(self, input_shape=24, cond_dim =24 ,latent_dim=12, hidden_dim=12):
-        super(VAE_60m, self).__init__()
+        super(VAE, self).__init__()
 
         self.input_shape = input_shape
         self.latent_dim = latent_dim
@@ -46,8 +45,6 @@ class VAE_60m(nn.Module):
                 
                 # third layer
                 nn.Linear(self.out_scale1*10,self.input_shape),
-                nn.BatchNorm1d(self.input_shape),
-                nn.Tanh()
             )
             
             
@@ -65,7 +62,7 @@ class VAE_60m(nn.Module):
 
     def forward(self, x, cond):
         x = torch.cat([x, cond], dim=1)
-        mu, logvar = self.encode(x)
+        mu, logvar = self.encode(x) 
         z = self.reparameterize(mu, logvar)
         z = torch.cat([z, cond], dim=1)
         return self.decode(z), mu, logvar
@@ -76,12 +73,3 @@ def loss_function_vae(recon_x, x, mu, logvar, beta):
     kld = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
     return mse + kld * beta
 
-
-# check case
-# data = torch.randn(100, 24)
-# cond = torch.randn(100, 24)
-# model = VAE_60m()
-# recon, mu, logvar = model(data, cond)
-# loss = loss_function_vae(recon, data, mu, logvar, 1)
-# loss.backward()
-# print(loss)

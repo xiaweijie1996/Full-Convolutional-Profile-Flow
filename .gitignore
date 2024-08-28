@@ -1,30 +1,16 @@
 # ignore python cache files
 alg/__pycache__/
 .venv
+tools/__pycache__/
 
-# ignore model files and figures
-exp/uncond_rlp_generation/exp_ge/FCPflow_model.pth
-exp/uncond_rlp_generation/exp_ge/FCPflow_generated.png
-exp/uncond_rlp_generation/exp_ge/train_ge_script.sh
+# ignore all .pth files
+*.pth
 
-exp/cond_rlp_generation/exp_uk/FCPflow_model.pth
-exp/cond_rlp_generation/exp_uk/FCPflow_generated.png
-exp/cond_rlp_generation/exp_uk/train_uk_script.sh
-exp/cond_rlp_generation/exp_uk_weather/FCPflow_generated.png
-exp/cond_rlp_generation/exp_uk_weather/FCPflow_model.pth
-exp/cond_rlp_generation/exp_aus/FCPflow_generated.png
-exp/cond_rlp_generation/exp_aus/FCPflow_model.pth
-exp/cond_rlp_generation/exp_nl/FCPflow_generated.png
-exp/cond_rlp_generation/exp_nl/FCPflow_model.pth
-exp/cond_rlp_generation/exp_usa/FCPflow_generated.png
-exp/cond_rlp_generation/exp_usa/FCPflow_model.pth
+# iIgnore all .png files
+*.png
 
-exp/prediction/usa/FCPflow_generated.png
-exp/prediction/usa/FCPflow_model.pth
-exp/prediction/uk/FCPflow_generated.png
-exp/prediction/uk/FCPflow_model.pth
-exp/prediction/nl/FCPflow_generated.png
-exp/prediction/nl/FCPflow_model.pth
+# ignore all .sh files
+*.sh
 
 # ingore wandb files
 wandb/
