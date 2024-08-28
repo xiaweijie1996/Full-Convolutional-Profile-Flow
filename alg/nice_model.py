@@ -81,9 +81,6 @@ class ConditionalAffineCouplingLayer(nn.Module):
     def forward(self, x, condition):
         # Device 
         device = x.device
-        
-        # First Affine Transformation with mask1
-        x = x # + self._positional_encoding(x).to(device)
         x11 = x[:,0::2]
         x12 = x[:,1::2]
         s1 = self.scale_net1(torch.cat([x11, condition], dim=1))
@@ -116,7 +113,7 @@ class ConditionalAffineCouplingLayer(nn.Module):
         # Compute log-determinant
         log_det = log_det_1 + log_det_2
 
-        return y, log_det.mean() # (sigma1 , sigma2)
+        return y, log_det.mean() 
 
     def inverse(self, y, condition):
         # First inverse Affine Transformation with mask1
@@ -138,13 +135,12 @@ class ConditionalAffineCouplingLayer(nn.Module):
         s1 = torch.atan(s1/self.sfactor)*2*self.sfactor/torch.pi
         t1 = self.translate_net1(torch.cat([x11, condition], dim=1))
         x12_trans = (x12_exp-t1)/torch.exp(s1)
-        x12 = x12_trans # + sigma1
+        x12 = x12_trans
     
         x = torch.empty_like(y)
         x[:,0::2] = x11
         x[:,1::2] = x12
         
-        x = x # - self._positional_encoding(x).to(x.device)
         return x
     
         
@@ -162,19 +158,12 @@ class FCPflowblock(nn.Module): # Fully convolutional time Flow Block
         self.coupling_layer = ConditionalAffineCouplingLayer(self.sfactor, self.input_dim, self.hidden_dim, self.condition_dim, self.output_dim)
 
     def forward(self, x, condition):
-        # reshape x to (batch_size, num_channels, 1)
-        x = x.unsqueeze(2)
-        x = x.squeeze(2)
-        
         x, log_det3 = self.coupling_layer(x, condition)
-        # x, log_det4 = self.tanh(x)
         
         return x,   log_det3
     
     def inverse(self, y, condition):
         x = self.coupling_layer.inverse(y, condition)
-        x = x.unsqueeze(2)
-        x = x.squeeze(2)
         return x
 
 class NICE(nn.Module): # Fully convolutional time flow

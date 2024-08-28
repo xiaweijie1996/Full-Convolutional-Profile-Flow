@@ -6,7 +6,7 @@ import numpy as np
 import wandb
 import time
 
-from tools.evaluation_m import MMD_kernel, calculate_w_distances
+from tools.evaluation_m import MMD_kernel, calculate_w_distances, calculate_energy_distances, ks_distance
 
 torch.set_default_dtype(torch.float64)
 
@@ -280,15 +280,24 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
         
         orig_data_pre = scaler.inverse_transform(pre.cpu().detach().numpy())
         orig_data_re = scaler.inverse_transform(re_data.cpu().detach().numpy())
+        orig_data_re = orig_data_re[ orig_data_re<0 ]=0
         
         # comput energy distance
-        _dis = MMD_kernel(orig_data_pre, orig_data_re)
+        _dis1 = MMD_kernel(orig_data_pre, orig_data_re)
+        _dis2 = calculate_w_distances(orig_data_pre, orig_data_re)
+        _dis3 = calculate_energy_distances(orig_data_pre, orig_data_re)
+        _dis5 = ks_distance(orig_data_pre, orig_data_re)
+
         if _wandb:
-            wandb.log({'time': time.time()-start_time,
-                        'epoch': epoch,
-                        'MMD':_dis,
-                        'loss:': loss.item()
-                       })
+             wandb.log({
+                'time': time.time() - start_time,
+                'epoch': epoch,
+                'MMD': _dis1,
+                'Wasserstein': _dis2,
+                'Energy': _dis3,
+                'KS': _dis5,
+                'loss': loss.item(),
+            })
         # ----------------- test the model -----------------
         
         # ----------------- plot the generated data -----------------

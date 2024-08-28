@@ -43,11 +43,15 @@ discriminator = md.Discriminator(input_shape, cond_dim , hidden_dim).to(device)
 optimizer_gen = torch.optim.Adam(generator.parameters(), lr=config['CWGAN']['lr_max'], weight_decay=1e-4)
 optimizer_dis = torch.optim.Adam(discriminator.parameters(), lr=config['CWGAN']['lr_max'])
 
-parem = sum(p.numel() for p in generator.parameters() if p.requires_grad)
+parem1 = sum(p.numel() for p in generator.parameters() if p.requires_grad)
+param2 = sum(p.numel() for p in discriminator.parameters() if p.requires_grad)
+parem = parem1 + param2
+print('number of parameters of generator {}'.format(parem1))
+print('number of parameters of discriminator {}'.format(param2))
 print('number of parameters {}'.format(parem))
 
 wandb.init(project="com_cost")
-wandb.log({"number of parameters": parem})
+wandb.log({"number of parameters": parem1})
 
 # ------------------- train the model -------------------
 twgan.train_cwgan(generator, discriminator, dataloader, optimizer_gen, optimizer_dis, 

@@ -29,7 +29,7 @@ np_array = np_array[~pd.isna(np_array).any(axis=1)]
 print('data shape: ', np_array.shape)
 
 # stack one extra column of zeros to the data as the condition
-np_array = np.hstack((np_array, np.ones((np_array.shape[0], 2))))
+np_array = np.hstack((np_array, np.ones((np_array.shape[0], 1))))
 dataloader, scaler = tl.create_data_loader(np_array, config['NICE']['batch_size'], True)
 
 # train the model
@@ -47,7 +47,7 @@ scheduler = None
 # wandb.log({"number of parameters": sum(p.numel() for p in model.parameters() if p.requires_grad)})
 
 # train the model
-path = os.path.join(_parent_path, 'exp/computational_cost/NICE')
+path = os.path.join(_parent_path, 'exp/computational_cost/nice')
 tn.train_com_cost(path, model, dataloader, optimizer, 1000001, config['NICE']['condition_dim'], 
-                  device, scaler, dataloader, scheduler, 100, True)
+                  device, scaler, dataloader, scheduler, 100, False)
 

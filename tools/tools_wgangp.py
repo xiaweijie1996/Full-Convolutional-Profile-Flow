@@ -71,14 +71,12 @@ def train_cwgan(generator, discriminator, dataloader, optimizer_gen, optimizer_d
         orig_data_pre = scaler.inverse_transform(pre.cpu().detach().numpy())
                     
         # check if nan in the data and cancel the nan values
-        orig_data_re = orig_data_re[~pd.isna(orig_data_re).any(axis=1)]
-        orig_data_pre = orig_data_pre[~pd.isna(orig_data_pre).any(axis=1)]
+        orig_data_re[orig_data_re < 0] = 0
         
         # Compute the MMD (Maximum Mean Discrepancy)
         _dis1 = MMD_kernel(orig_data_pre, orig_data_re)
         _dis2 = calculate_w_distances(orig_data_pre, orig_data_re)
         _dis3 = calculate_energy_distances(orig_data_pre, orig_data_re)
-        # _dis4 = calculate_autocorrelation_mse(orig_data_pre, orig_data_re)
         _dis5 = ks_distance(orig_data_pre, orig_data_re)
 
 
