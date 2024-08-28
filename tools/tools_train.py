@@ -270,7 +270,7 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
         # ----------------- test the model -----------------
         model.eval()
         
-        print('epoch: ', epoch, 'loss: ', loss.item())
+        # print('epoch: ', epoch, 'loss: ', loss.item())
 
         # plot the generated data
         z = torch.randn(data.shape[0], data.shape[1]).to(device)
@@ -280,7 +280,6 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
         
         orig_data_pre = scaler.inverse_transform(pre.cpu().detach().numpy())
         orig_data_re = scaler.inverse_transform(re_data.cpu().detach().numpy())
-        orig_data_re = orig_data_re[ orig_data_re<0 ]=0
         
         # comput energy distance
         _dis1 = MMD_kernel(orig_data_pre, orig_data_re)
@@ -301,9 +300,9 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
         # ----------------- test the model -----------------
         
         # ----------------- plot the generated data -----------------
-        if epoch % pgap ==0: 
-            save_path = path + '/FCPflow_generated.png'
-            plot_figure(pre, re_data, scaler, cond_dim, save_path)
+        # if epoch % pgap ==0: 
+        #     save_path = path + '/FCPflow_generated.png'
+        #     plot_figure(pre, re_data, scaler, cond_dim, save_path)
         # ----------------- plot the generated data -----------------
 
 

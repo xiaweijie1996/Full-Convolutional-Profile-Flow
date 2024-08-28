@@ -45,11 +45,11 @@ optimizer = torch.optim.Adam(model.parameters(), lr=config['FCPflow']['lr_max'],
 scheduler = None
 
 # define the wandb
-# wandb.init(project="com_cost")
-# wandb.log({"number of parameters": sum(p.numel() for p in model.parameters() if p.requires_grad)})
+wandb.init(project="com_cost")
+wandb.log({"number of parameters": sum(p.numel() for p in model.parameters() if p.requires_grad)})
 
 # train the model
 path = os.path.join(_parent_path, 'exp/computational_cost/fcpflow')
-tl.train_com_cost(path, model, dataloader, optimizer, 1000001, config['FCPflow']['condition_dim'], 
-                  device, scaler, dataloader, scheduler, 100, False)
+tl.train_com_cost(path, model, dataloader, optimizer, 100001, config['FCPflow']['condition_dim'], 
+                  device, scaler, dataloader, scheduler, 100, True)
 
