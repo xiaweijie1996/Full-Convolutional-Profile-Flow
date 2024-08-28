@@ -50,6 +50,6 @@ wandb.log({"number of parameters": sum(p.numel() for p in model.parameters() if 
 
 # train the model
 path = os.path.join(_parent_path, 'exp/computational_cost/fcpflow')
-tl.train_com_cost(path, model, dataloader, optimizer, 100001, config['FCPflow']['condition_dim'], 
+tl.train_com_cost(path, model, dataloader, optimizer, 500001, config['FCPflow']['condition_dim'], 
                   device, scaler, dataloader, scheduler, 100, True)
 
