@@ -16,7 +16,7 @@ setup(
         'matplotlib==3.7.0',
         'scikit-learn==1.2.2',
         'scipy<1.9.2',
-        'pandas=2.2.2',
+        'pandas==2.2.2',
         'wandb==0.17.7',
         # Add other dependencies here
     ],
