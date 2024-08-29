@@ -1,6 +1,7 @@
-matplotlib
-pandas
-numpy
+pandas = 2.2.2
+numpy = 1.26.4
 scikit-learn == 1.2.2
-torch == torch==2.2.2
+torch == 2.4.0
 scipy == 1.11.4
+wandb = 0.17.7
+matplotlib = 2.1.5
