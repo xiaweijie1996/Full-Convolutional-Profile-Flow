@@ -13,7 +13,7 @@ setup(
     install_requires=[
         'torch==2.4.0',
         'numpy==1.26.4',
-        'matplotlib==2.1.5',
+        'matplotlib',
         'scikit-learn==1.2.2',
         'scipy==1.11.4',
         'pandas==2.2.2',
