@@ -15,5 +15,8 @@ tools/__pycache__/
 # ingore wandb files
 wandb/
 
+# ignore all .TTF
+*.TTF
+
 # ignore useless files
 alg/trash_function.py
