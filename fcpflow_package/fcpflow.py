@@ -36,13 +36,16 @@ class FCPflowPipeline:
         lr_max: Union[int, float] = 0.0005,
         lr_step_size: Union[int, float] = 2000,
         w_decay: Union[int, float] = 0.0,
-        batch_size: Union[int, float] = 2000):
+        batch_size: Union[int, float] = 2000,
+        ggap: Union[int, float] = 100,
+        ):
         
         self.lr_min = lr_min
         self.lr_max = lr_max
         self.lr_step_size = lr_step_size
         self.w_decay = w_decay
         self.batch_size = batch_size
+        self.ggap = ggap
         print('Learning set defined')
     
     def _define_model(self):
@@ -78,7 +81,7 @@ class FCPflowPipeline:
         else:
             scheduler = None
         tl.train( save_path,self.model, self.dataloader_train, optimizer, num_epochs, self.condition_dim, 
-                device, self.scaler, self.dataloader_test, scheduler, 100, _wandb=False, _plot=True, _save=True)
+                device, self.scaler, self.dataloader_test, scheduler, self.ggap, _wandb=False, _plot=True, _save=True)
         
         print('Model trained')
     
