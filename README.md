@@ -60,7 +60,7 @@ pipeline = FCPflowPipeline(
 )
 
 # Define the save path
-save_path = 'fcpflow_output/'  # Directory where model and outputs will be saved
+save_path = ''  # Directory where model and outputs will be saved
 
 # Prepare the data
 data_path = 'nl_data_1household.csv'
