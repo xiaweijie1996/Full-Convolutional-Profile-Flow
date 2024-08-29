@@ -37,7 +37,7 @@ def train_cwgan(generator, discriminator, dataloader, optimizer_gen, optimizer_d
             grad_p = md.compute_gradient_penalty(discriminator, cond, data, gen_fake.detach(), device)
             
             # Calculate the WGAN loss for discriminator
-            loss_dis = -torch.mean(real_label) + torch.mean(fake_label) + 1 * grad_p
+            loss_dis = -torch.mean(real_label) + torch.mean(fake_label) + 10 * grad_p
             
             # Update the discriminator
             optimizer_dis.zero_grad()
@@ -75,9 +75,9 @@ def train_cwgan(generator, discriminator, dataloader, optimizer_gen, optimizer_d
         
         # Compute the MMD (Maximum Mean Discrepancy)
         _dis1 = MMD_kernel(orig_data_pre, orig_data_re)
-        _dis2 = calculate_w_distances(orig_data_pre, orig_data_re)
-        _dis3 = calculate_energy_distances(orig_data_pre, orig_data_re)
-        _dis5 = ks_distance(orig_data_pre, orig_data_re)
+        # _dis2 = calculate_w_distances(orig_data_pre, orig_data_re)
+        # _dis3 = calculate_energy_distances(orig_data_pre, orig_data_re)
+        # _dis5 = ks_distance(orig_data_pre, orig_data_re)
 
 
         # Save plots every 100 epochs
@@ -91,10 +91,10 @@ def train_cwgan(generator, discriminator, dataloader, optimizer_gen, optimizer_d
                 'time': time.time() - start_time,
                 'epoch': epoch,
                 'MMD': _dis1,
-                'Wasserstein': _dis2,
-                'Energy': _dis3,
-                # 'Autocorrelation': _dis4,
-                'KS': _dis5,
+                # 'Wasserstein': _dis2,
+                # 'Energy': _dis3,
+                # # 'Autocorrelation': _dis4,
+                # 'KS': _dis5,
                 'loss_dis': loss_dis.item(),
                 'loss_gen': loss_gen.item()
             })

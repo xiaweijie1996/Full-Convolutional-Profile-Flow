@@ -47,12 +47,10 @@ parem1 = sum(p.numel() for p in generator.parameters() if p.requires_grad)
 param2 = sum(p.numel() for p in discriminator.parameters() if p.requires_grad)
 parem = parem1 + param2
 print('number of parameters of generator {}'.format(parem1))
-print('number of parameters of discriminator {}'.format(param2))
-print('number of parameters {}'.format(parem))
 
 wandb.init(project="com_cost")
 wandb.log({"number of parameters": parem1})
 
 # ------------------- train the model -------------------
 twgan.train_cwgan(generator, discriminator, dataloader, optimizer_gen, optimizer_dis, 
-                scaler, latent_dim, cond_dim, device, _parent_path, epochs=100001, log_wandb=True)
+                scaler, latent_dim, cond_dim, device, _parent_path, epochs=150001, log_wandb=True)

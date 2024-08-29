@@ -22,7 +22,7 @@ copula = EllipticalCopula(data.T)
 copula.fit()
 # sample the data
 samples = copula.sample(data.shape[0])
-end = time.time()   
+  
 
 # plot the data
 plt.figure()
@@ -32,6 +32,8 @@ plt.savefig(save_path)
 
 # calculate the MMD
 mmd = MMD_kernel(data, samples.T)
+end = time.time() 
+
 print('mmd: ', mmd)
 print('Data shape: ', data.shape)
 print('Samples shape: ', samples.shape)
