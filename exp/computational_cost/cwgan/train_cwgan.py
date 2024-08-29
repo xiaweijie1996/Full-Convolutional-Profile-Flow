@@ -53,4 +53,4 @@ wandb.log({"number of parameters": parem1})
 
 # ------------------- train the model -------------------
 twgan.train_cwgan(generator, discriminator, dataloader, optimizer_gen, optimizer_dis, 
-                scaler, latent_dim, cond_dim, device, _parent_path, epochs=150001, log_wandb=True)
+                scaler, latent_dim, cond_dim, device, _parent_path, epochs=350001, log_wandb=True)

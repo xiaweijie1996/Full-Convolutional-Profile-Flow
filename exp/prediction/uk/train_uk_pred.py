@@ -11,7 +11,7 @@ import wandb
 import yaml
 
 import alg.models_fcpflow_lin as fcpf
-import alg.tools_train as tl
+import tools.tools_train as tl
 
 # define the device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
