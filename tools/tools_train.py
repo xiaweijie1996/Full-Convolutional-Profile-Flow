@@ -119,7 +119,7 @@ def plot_pre(pre, re_data, scaler, con_dim, path='Generated Data Comparison.png'
     plt.savefig(path)
     plt.close()
     
-def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True):
+def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True, _plot=True, _save=True):
     model.train()
     loss_mid = 0
     for epoch in range(epochs):
@@ -143,7 +143,7 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
                 scheduler.step()
             
         # ----------------- moniter loss -----------------
-        # print(epoch, 'loss: ', loss.item())
+        print(epoch, 'loss: ', loss.item())
         if _wandb:
             wandb.log({'loss': loss.item()})
         # ----------------- moniter loss -----------------
@@ -161,10 +161,12 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
         loss_test = -llh_test.mean()-logdet_test
         
         # save the model
-        if loss_test.item() < loss_mid:
-            save_path = path + '/FCPflow_model.pth'
-            torch.save(model.state_dict(), save_path)
-            loss_mid = loss_test.item()
+        if _save:
+            if loss_test.item() < loss_mid:
+                print('save the model')
+                save_path = path + '/FCPflow_model.pth'
+                torch.save(model.state_dict(), save_path)
+                loss_mid = loss_test.item()
             
             
         # plot the generated data
@@ -175,9 +177,10 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
         # ----------------- test the model -----------------
         
         # ----------------- plot the generated data -----------------
-        if epoch % pgap ==0: 
-            save_path = path + '/FCPflow_generated.png'
-            plot_figure(pre, re_data, scaler, cond_dim, save_path)
+        if _plot:
+            if epoch % pgap ==0: 
+                save_path = path + '/FCPflow_generated.png'
+                plot_figure(pre, re_data, scaler, cond_dim, save_path)
         # ----------------- plot the generated data -----------------
 
 def train_pre(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True):
