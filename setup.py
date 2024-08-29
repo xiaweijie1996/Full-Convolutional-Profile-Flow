@@ -11,11 +11,11 @@ setup(
     url='https://github.com/xiaweijie1996/Full-Convolutional-Profile-Flow.git',  # URL of your project's repository
     packages=find_packages(),  # Automatically find packages in the project
     install_requires=[
-        'torch==2.4.0',
-        'numpy==1.26.4',
-        'matplotlib',
+        'torch==2.1.2',
+        'numpy==1.23.5',
+        'matplotlib==3.7.0',
         'scikit-learn==1.2.2',
-        'scipy==1.11.4',
+        'scipy==1.10.1',
         'pandas==2.2.2',
         'wandb==0.17.7',
         # Add other dependencies here
