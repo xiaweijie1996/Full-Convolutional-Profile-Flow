@@ -91,6 +91,12 @@ plt.plot(samples[:, :-1].T)
 plt.savefig(save_path + 'sample.png')
 ```
 
+The few step results are shown below
+
+<p align="center">
+  <img src="materials/demo.gif" alt="Top Bar", width="500">
+</p>
+
 ## FCPFlow Model Structure
 
 ![ffctfflow+str](https://github.com/xiaweijie1996/Full-Convolutional-Time-Series-Flow/assets/84010474/f29e1a10-0ae9-4a76-b20a-c9c1e5d781c3)
