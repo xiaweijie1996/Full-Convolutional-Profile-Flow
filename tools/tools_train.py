@@ -121,7 +121,7 @@ def plot_pre(pre, re_data, scaler, con_dim, path='Generated Data Comparison.png'
     
 def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True, _plot=True, _save=True):
     model.train()
-    loss_mid = 0
+    loss_mid = 100000000
     for epoch in range(epochs):
         for _, data in enumerate(train_loader):
             model.train()

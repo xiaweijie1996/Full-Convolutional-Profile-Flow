@@ -9,6 +9,10 @@ class InvertibleNorm(nn.Module):
         super(InvertibleNorm, self).__init__()
         self.num_channels = num_channels
         
+        # Initialize running_mean and running_std as buffers to be part of the model's state
+        self.register_buffer('running_mean', torch.zeros(1, num_channels, 1))
+        self.register_buffer('running_std', torch.ones(1, num_channels, 1))
+        
     def forward(self, input):
         self.running_mean = torch.mean(input, dim=[0, 2], keepdim=True)
         self.running_std = torch.std(input, dim=[0, 2], keepdim=True)
