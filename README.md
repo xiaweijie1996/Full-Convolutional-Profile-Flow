@@ -30,7 +30,66 @@ For the of GAN, VAE, etc, please check: [Generative models](https://github.com/x
 
 ## How to Train Your Own FCPflow
 
-We will provide this soon.
+#### Creating Environment
+
+First, creating a virtual environment and activate:
+```bash
+conda create --name fcpflow_env
+conda activate fcpflow_env
+```
+
+#### Install the Package
+
+```
+pip install git+https://github.com/xiaweijie1996/Full-Convolutional-Profile-Flow.git
+```
+#### Usage
+```
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from fcpflow_package import FCPflowPipeline
+
+# Initialize the pipeline
+pipeline = FCPflowPipeline(
+    num_blocks = 2,  # Number of blocks in the model
+    num_channels = 24,  # Resolution of the time series 
+    hidden_dim = 12,  # Dimension of the hidden layers
+    condition_dim = 1,  # Dimension of the condition vector, must be larger than 1
+    sfactor = 0.3,  # Scaling factor
+)
+
+# Define the save path
+save_path = 'fcpflow_output/'  # Directory where model and outputs will be saved
+
+# Prepare the data
+data_path = 'nl_data_1household.csv'
+np_array = pd.read_csv(data_path).iloc[:, 3:-2].values
+np_array = np_array[~pd.isna(np_array).any(axis=1)]
+np_array = np.hstack((np_array, np.ones((np_array.shape[0], 1))))
+
+# Define the learning set and the model
+pipeline._define_learning_set()
+pipeline._define_model()
+
+# Train the model
+pipeline.train_model(1, np_array, None, save_path, device='cpu', train_scheduler=False)
+
+# Load the trained model
+model_path = save_path + 'FCPflow_model.pth'
+model = pipeline.load_model(model_path)
+
+# Process the data for prediction
+pipeline.data_processing(np_array, None)
+
+# Sample from the trained model
+condition_array = np_array[:10, -1:]
+samples = pipeline.sample_from_trained_model(condition_array, device='cpu')
+
+# Plot the samples
+plt.plot(samples[:, :-1].T)
+plt.savefig(save_path + 'sample.png')
+```
 
 ## FCPFlow Model Structure
 
