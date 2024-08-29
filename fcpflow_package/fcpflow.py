@@ -4,7 +4,7 @@ _parent_path =os.path.join(os.path.dirname(__file__), '..',)
 sys.path.append(_parent_path)
 
 import torch
-import torch.nn as nn
+import numpy as np
 from typing import Union
 import warnings
 warnings.filterwarnings("ignore", message=".*torch.qr is deprecated.*")
@@ -53,7 +53,7 @@ class FCPflowPipeline:
                                            sfactor=self.sfactor)
         num_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
         print('FCPflow Model defined' )
-        print('Number of parameters: ', num_params)
+        print('Number of parameters:', num_params)
 
     
     def data_processing(self, train_array, val_array):
@@ -65,7 +65,7 @@ class FCPflowPipeline:
             self.dataloader_test, _ = tl.create_data_loader(val_array, self.batch_size, True)
             
     
-    def train_model(self, num_epochs, train_array, val_array, save_path, device='gpu',train_scheduler=False):
+    def train_model(self, num_epochs, train_array, val_array, save_path, device='gpu', train_scheduler=False):
         print('the data has to be numpy arrays which has shape (n_samples, legnth of RLP + length of condition vector)') 
         # Train the model
         self.data_processing(train_array, val_array)
@@ -98,7 +98,7 @@ class FCPflowPipeline:
         z = torch.randn(condition_array.shape[0], self.num_channels).to(device)
         condition_array = torch.tensor(condition_array).to(device)
         
-        gen_test = model.inverse(z, condition_array)
+        gen_test = self.model.inverse(z, condition_array)
         re_data = torch.cat((gen_test, condition_array), dim=1)
         re_data = re_data.detach()
         re_data = self.scaler.inverse_transform(re_data)
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     
     pipeline.train_model(1, np_array, None, save_path, device='cpu', train_scheduler=False)
     
-    model_path = save_path +'/FCPflow_model.pth'
+    model_path = save_path +'FCPflow_model.pth'
     model = pipeline.load_model(model_path)
     pipeline.data_processing(np_array, None)
     
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     # plot the samples
     print(samples.shape)
     plt.plot(samples[:,:-1].T)
-    plt.savefig(save_path+'/sample.png')
+    plt.savefig(save_path+'sample.png')
     
     
     

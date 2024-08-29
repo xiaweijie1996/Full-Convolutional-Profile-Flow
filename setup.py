@@ -12,7 +12,7 @@ setup(
     packages=find_packages(),  # Automatically find packages in the project
     install_requires=[
         'torch==2.1.2',
-        'numpy',
+        'numpy<2.0',
         'matplotlib==3.7.0',
         'scikit-learn',
         'scipy',

@@ -164,7 +164,7 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
         if _save:
             if loss_test.item() < loss_mid:
                 print('save the model')
-                save_path = path + '/FCPflow_model.pth'
+                save_path = path + 'FCPflow_model.pth'
                 torch.save(model.state_dict(), save_path)
                 loss_mid = loss_test.item()
             
@@ -179,134 +179,8 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
         # ----------------- plot the generated data -----------------
         if _plot:
             if epoch % pgap ==0: 
-                save_path = path + '/FCPflow_generated.png'
+                save_path = path + 'FCPflow_generated.png'
                 plot_figure(pre, re_data, scaler, cond_dim, save_path)
         # ----------------- plot the generated data -----------------
-
-def train_pre(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True):
-    model.train()
-    loss_mid = 0
-    energy_mid = 100
-    for epoch in range(epochs):
-        for _, data in enumerate(train_loader):
-            model.train()
-            pre = data[0].to(device) # + torch.randn_like(data[0].to(device))/(256)
-            
-            # split the data into data and conditions
-            data = pre[:,-cond_dim:]
-            cond = pre[:,:-cond_dim] # + torch.rand_like(data[:,:-cond_dim])/(256) 
-            
-            gen, logdet = model(data, cond)
-            
-            # compute the log likelihood loss
-            llh = log_likelihood(gen, type='Gaussian')
-            loss = -llh.mean()-logdet
-            optimizer.zero_grad()
-            loss.backward(retain_graph=True)
-            optimizer.step()
-            if scheduler is not None:
-                scheduler.step()
-            
-        # ----------------- moniter loss -----------------
-        print(epoch, 'loss: ', loss.item())
-        if _wandb:
-            wandb.log({'loss': loss.item()})
-        # ----------------- moniter loss -----------------
-            
-        # ----------------- test the model -----------------
-        model.eval()
-        
-        # test the model
-        pre = next(iter(test_loader))[0].to(device)
-        data_test = pre[:,-cond_dim:]
-        cond_test = pre[:,:-cond_dim]
-        
-        gen_test, logdet_test = model(data_test, cond_test)
-        llh_test = log_likelihood(gen_test, type='Gaussian')
-        loss_test = -llh_test.mean()-logdet_test
-        
-        # save the model
-        if loss_test.item() < loss_mid:
-            save_path = path + '/FCPflow_model.pth'
-            torch.save(model.state_dict(), save_path)
-            loss_mid = loss_test.item()
-            
-            
-        # plot the generated data
-        z = torch.randn(100, data_test.shape[1]).to(device)
-        _cond = cond_test[0].repeat(100, 1)
-        
-        cond_test = _cond
-        gen_test = model.inverse(z, cond_test)
-        re_data = torch.cat((gen_test, cond_test), dim=1)
-        re_data = re_data.detach()
-        
-        # ----------------- plot the generated data -----------------
-        if epoch % pgap ==0: 
-            save_path = path + '/FCPflow_generated.png'
-            plot_pre(pre, re_data, scaler, cond_dim, save_path)
-        # ----------------- plot the generated data -----------------
-
-def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True):
-    model.train()
-    start_time = time.time()
-    for epoch in range(epochs):
-        for _, data in enumerate(train_loader):
-            model.train()
-            pre = data[0].to(device) # + torch.randn_like(data[0].to(device))/(256)
-            
-            # split the data into data and conditions
-            cond = pre[:,-cond_dim:]
-            data = pre[:,:-cond_dim] # + torch.rand_like(data[:,:-cond_dim])/(256) 
-            
-            gen, logdet = model(data, cond)
-            
-            # compute the log likelihood loss
-            llh = log_likelihood(gen, type='Gaussian')
-            loss = -llh.mean()-logdet
-            optimizer.zero_grad()
-            loss.backward(retain_graph=True)
-            optimizer.step()
-            if scheduler is not None:
-                scheduler.step()
-            
-        # ----------------- test the model -----------------
-        model.eval()
-        
-        # print('epoch: ', epoch, 'loss: ', loss.item())
-
-        # plot the generated data
-        z = torch.randn(data.shape[0], data.shape[1]).to(device)
-        gen_test = model.inverse(z, cond)
-        re_data = torch.cat((gen_test, cond), dim=1)
-        re_data = re_data.detach()
-        
-        orig_data_pre = scaler.inverse_transform(pre.cpu().detach().numpy())
-        orig_data_re = scaler.inverse_transform(re_data.cpu().detach().numpy())
-        
-        # comput energy distance
-        _dis1 = MMD_kernel(orig_data_pre, orig_data_re)
-        # _dis2 = calculate_w_distances(orig_data_pre, orig_data_re)
-        # _dis3 = calculate_energy_distances(orig_data_pre, orig_data_re)
-        # _dis5 = ks_distance(orig_data_pre, orig_data_re)
-
-        if _wandb:
-             wandb.log({
-                'time': time.time() - start_time,
-                'epoch': epoch,
-                'MMD': _dis1,
-                # 'Wasserstein': _dis2,
-                # 'Energy': _dis3,
-                # 'KS': _dis5,
-                'loss': loss.item(),
-            })
-        # ----------------- test the model -----------------
-        
-        # ----------------- plot the generated data -----------------
-        # if epoch % pgap ==0: 
-        #     save_path = path + '/FCPflow_generated.png'
-        #     plot_figure(pre, re_data, scaler, cond_dim, save_path)
-        # ----------------- plot the generated data -----------------
-
 
 
