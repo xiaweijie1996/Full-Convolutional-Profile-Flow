@@ -14,9 +14,9 @@ setup(
         'torch==2.1.2',
         'numpy==1.23.5',
         'matplotlib==3.7.0',
-        'scikit-learn>=1.3.0,<1.4.1',
+        'scikit-learn==1.2.2',
         'scipy<1.9.2',
-        'pandas<1.6.0',
+        'pandas=2.2.2',
         'wandb==0.17.7',
         # Add other dependencies here
     ],
