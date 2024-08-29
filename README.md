@@ -91,7 +91,7 @@ plt.plot(samples[:, :-1].T)
 plt.savefig(save_path + 'sample.png')
 ```
 
-The few step results are shown below
+We train few step and save the generation results of these steps which are shown below 
 
 <p align="center">
   <img src="materials/demo.gif" alt="Top Bar", width="500">
