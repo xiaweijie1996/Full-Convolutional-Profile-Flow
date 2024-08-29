@@ -74,7 +74,7 @@ def gaussian_kernel(matrix1, matrix2, bandwidth):
     dists = euclidean_distances(matrix1, matrix2, squared=True)  # squared Euclidean distance
     return np.exp(-dists / bandwidth)
 
-def MMD_kernel(a, b, bandwidths = [0.2]):
+def MMD_kernel(a, b, bandwidths = [0.04,1,10]):
     kernels_a = np.mean([gaussian_kernel(a, a, bandwidth) for bandwidth in bandwidths], axis=0)
     kernels_b = np.mean([gaussian_kernel(b, b, bandwidth) for bandwidth in bandwidths], axis=0)
     kernels_ab = np.mean([gaussian_kernel(a, b, bandwidth) for bandwidth in bandwidths], axis=0)

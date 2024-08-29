@@ -60,9 +60,10 @@ data_original = pd.read_csv(path_original).values
 copula_data = pd.read_csv(path_copula, index_col=0).values
 fcpflow_data = pd.read_csv(path_fcpflow, index_col=0).values
 gmm_data = pd.read_csv(path_gmm, index_col=0).values
-data_original, copula_data, fcpflow_data, gmm_data = sampler(data_original, copula_data, fcpflow_data, gmm_data, num_samples=1000)
-original_max_vi = get_max_and_index(data_original, copula_data, fcpflow_data, gmm_data)
-models = ['Original', 'Copula', 'FCPflow', 'GMM']
+wgan_data = pd.read_csv(path_wgan, index_col=0).values
+data_original, copula_data, fcpflow_data, gmm_data, wgan_data = sampler(data_original, copula_data, fcpflow_data, gmm_data, wgan_data, num_samples=1000)
+original_max_vi = get_max_and_index(data_original, copula_data, fcpflow_data, gmm_data, wgan_data)
+models = ['Original', 'Copula', 'FCPflow', 'GMM', 'WGAN-gp']
 plot_peak_times(original_max_vi, 15, 'ge', models)
 # ---------- analysis the peak of the of ge data ----------
 

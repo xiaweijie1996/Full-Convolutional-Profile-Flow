@@ -283,18 +283,18 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
         
         # comput energy distance
         _dis1 = MMD_kernel(orig_data_pre, orig_data_re)
-        _dis2 = calculate_w_distances(orig_data_pre, orig_data_re)
-        _dis3 = calculate_energy_distances(orig_data_pre, orig_data_re)
-        _dis5 = ks_distance(orig_data_pre, orig_data_re)
+        # _dis2 = calculate_w_distances(orig_data_pre, orig_data_re)
+        # _dis3 = calculate_energy_distances(orig_data_pre, orig_data_re)
+        # _dis5 = ks_distance(orig_data_pre, orig_data_re)
 
         if _wandb:
              wandb.log({
                 'time': time.time() - start_time,
                 'epoch': epoch,
                 'MMD': _dis1,
-                'Wasserstein': _dis2,
-                'Energy': _dis3,
-                'KS': _dis5,
+                # 'Wasserstein': _dis2,
+                # 'Energy': _dis3,
+                # 'KS': _dis5,
                 'loss': loss.item(),
             })
         # ----------------- test the model -----------------
