@@ -80,7 +80,7 @@ gmm_data = pd.read_csv(path_gmm, index_col=0).values
 wgan_data = pd.read_csv(path_wgan, index_col=0).values
 data_original, copula_data, fcpflow_data, gmm_data, wgan_data = sampler(data_original, copula_data, fcpflow_data, gmm_data, wgan_data, num_samples=1000)
 original_max_vi = get_max_and_index(data_original, copula_data, fcpflow_data, gmm_data, wgan_data)
-models = ['Original', 'Copula', 'FCPflow', 'GMM', 'WGAN-gp']
+models = ['Original', 'Copula', 'FCPFlow', 'GMM', 'WGAN-gp']
 ave_points = plot_peak_times(original_max_vi, 15, 'ge', models)
 compute_dis(ave_points,  models=models)
 # ---------- analysis the peak of the of ge data ----------
@@ -97,7 +97,7 @@ data_fcpflow = pd.read_csv(path_fcpflow, index_col=0).iloc[:, :-2].values
 data_original, data_copula, data_fcpflow = sampler(data_original, data_copula, data_fcpflow, num_samples=1000)
 print(data_original.shape, data_copula.shape, data_fcpflow.shape)
 original_max_vi = get_max_and_index(data_original, data_copula, data_fcpflow)
-models = ['Original', 'Copula', 'FCPflow']
+models = ['Original', 'Copula', 'FCPFlow']
 ave_points = plot_peak_times(original_max_vi, 60, 'nl', models)
 compute_dis(ave_points, models)
 # ---------- analysis the peak of the of nl data ----------
@@ -113,7 +113,7 @@ data_fcpflow = pd.read_csv(path_fcpflow, index_col=0).iloc[:, :-2].values
 data_original, data_copula, data_fcpflow = sampler(data_original, data_copula, data_fcpflow, num_samples=1000)
 print(data_original.shape, data_copula.shape, data_fcpflow.shape)
 original_max_vi = get_max_and_index(data_original, data_copula, data_fcpflow)
-models = ['Original', 'Copula', 'FCPflow']
+models = ['Original', 'Copula', 'FCPFlow']
 ave_points = plot_peak_times(original_max_vi, 30, 'uk', models)
 compute_dis(ave_points, models)
 # ---------- analysis the peak of the of uk data ----------
@@ -128,7 +128,7 @@ data_fcpflow = pd.read_csv(path_fcpflow, index_col=0).iloc[:, :-2].values
 data_original, data_copula, data_fcpflow = sampler(data_original, data_copula, data_fcpflow, num_samples=1000)
 print(data_original.shape, data_copula.shape, data_fcpflow.shape)
 original_max_vi = get_max_and_index(data_original, data_copula, data_fcpflow)
-models = ['Original', 'Copula', 'FCPflow']
+models = ['Original', 'Copula', 'FCPFlow']
 ave_points = plot_peak_times(original_max_vi, 30, 'aus', models)
 compute_dis(ave_points, models)
 # ---------- analysis the peak of the of aus data ----------
@@ -144,7 +144,7 @@ data_original = data_original[~pd.isna(data_original).any(axis=1)]
 data_original, data_copula, data_fcpflow = sampler(data_original, data_copula, data_fcpflow, num_samples=1000)
 print(data_original.shape, data_copula.shape, data_fcpflow.shape)
 original_max_vi = get_max_and_index(data_original, data_copula, data_fcpflow)
-models = ['Original', 'Copula', 'FCPflow']
+models = ['Original', 'Copula', 'FCPFlow']
 ave_points = plot_peak_times(original_max_vi, 15, 'usa', models)
 compute_dis(ave_points, models)
 # ---------- analysis the peak of the of usa data ----------
@@ -160,7 +160,7 @@ data_original = data_original[~pd.isna(data_original).any(axis=1)]
 data_original, data_copula, data_fcpflow = sampler(data_original, data_copula, data_fcpflow, num_samples=1000)
 print(data_original.shape, data_copula.shape, data_fcpflow.shape)
 original_max_vi = get_max_and_index(data_original, data_copula, data_fcpflow)
-models = ['Original', 'Copula', 'FCPflow']
+models = ['Original', 'Copula', 'FCPFlow']
 ave_points = plot_peak_times(original_max_vi, 30, 'uk_weather', models)
 compute_dis(ave_points, models)
 # ---------- analysis the peak of the of uk weather data ----------

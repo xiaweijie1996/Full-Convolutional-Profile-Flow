@@ -20,3 +20,4 @@ wandb/
 
 # ignore useless files
 alg/trash_function.py
+alg/nice_model copy.py

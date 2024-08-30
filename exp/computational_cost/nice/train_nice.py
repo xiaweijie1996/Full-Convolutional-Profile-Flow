@@ -33,8 +33,8 @@ np_array = np.hstack((np_array, np.ones((np_array.shape[0], 1))))
 dataloader, scaler = tl.create_data_loader(np_array, config['NICE']['batch_size'], True)
 
 # train the model
-model = nm.NICE(config['NICE']['num_blocks'], config['NICE']['num_channels'], 
-                        config['NICE']['sfactor'], config['NICE']['hidden_dim'], config['NICE']['condition_dim']).to(device)
+model = nm.NICE(config['NICE']['num_blocks'], config['NICE']['sfactor'], 'linear', config['NICE']['num_channels'],
+                         config['NICE']['hidden_dim'], config['NICE']['condition_dim']).to(device)
 
 print('number of parameters: ', sum(p.numel() for p in model.parameters() if p.requires_grad))
 
@@ -48,6 +48,6 @@ wandb.log({"number of parameters": sum(p.numel() for p in model.parameters() if 
 
 # train the model
 path = os.path.join(_parent_path, 'exp/computational_cost/nice')
-tn.train_com_cost(path, model, dataloader, optimizer, 400001, config['NICE']['condition_dim'], 
+tn.train_com_cost(path, model, dataloader, optimizer, 600001, config['NICE']['condition_dim'], 
                   device, scaler, dataloader, scheduler, 100, True)
 

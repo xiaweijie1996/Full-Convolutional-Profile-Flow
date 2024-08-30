@@ -1,8 +1,8 @@
 NICE:
   #--------Define the model--------
-  num_blocks: 8
+  num_blocks: 5
   sfactor: 0.3
-  hidden_dim: 50
+  hidden_dim: 68
   num_channels: 24 # resolution of the time series 
   condition_dim: 1 # unconditioned generation
   net_type: 'linear'
