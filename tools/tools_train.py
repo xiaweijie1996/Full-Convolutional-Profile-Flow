@@ -98,6 +98,7 @@ def plot_figure(pre, re_data, scaler, con_dim, path='Generated Data Comparison.p
     # Adjust layout and save the figure
     plt.tight_layout()
     plt.savefig(path)
+    plt.close()
 
 def plot_pre(pre, re_data, scaler, con_dim, path='Generated Data Comparison.png'):
     # Inverse transform to get the original scale of the data
@@ -182,7 +183,6 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
                 save_path = path + 'FCPflow_generated.png'
                 plot_figure(pre, re_data, scaler, cond_dim, save_path)
         # ----------------- plot the generated data -----------------
-
 
 def train_pre(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True):
     model.train()
@@ -287,18 +287,13 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
 
         # comput energy distance
         _dis1 = MMD_kernel(orig_data_pre, orig_data_re)
-        # _dis2 = calculate_w_distances(orig_data_pre, orig_data_re)
-        # _dis3 = calculate_energy_distances(orig_data_pre, orig_data_re)
-        # _dis5 = ks_distance(orig_data_pre, orig_data_re)
+
 
         if _wandb:
              wandb.log({
                 'time': time.time() - start_time,
                 'epoch': epoch,
                 'MMD': _dis1,
-                # 'Wasserstein': _dis2,
-                # 'Energy': _dis3,
-                # 'KS': _dis5,
                 'loss': loss.item(),
             })
         # ----------------- test the model -----------------
@@ -307,4 +302,69 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
         # if epoch % pgap ==0: 
         #     save_path = path + '/FCPflow_generated.png'
         #     plot_figure(pre, re_data, scaler, cond_dim, save_path)
+        # ----------------- plot the generated data -----------------
+
+def train_data_ana(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, 
+                   scheduler, pgap=100, _wandb=True, _plot=False, _save=False):
+    model.train()
+    for epoch in range(epochs):
+        for _, data in enumerate(train_loader):
+            model.train()
+            pre = data[0].to(device) # + torch.randn_like(data[0].to(device))/(256)
+            
+            # split the data into data and conditions
+            cond = pre[:,-cond_dim:]
+            data = pre[:,:-cond_dim] # + torch.rand_like(data[:,:-cond_dim])/(256) 
+            
+            gen, logdet = model(data, cond)
+            
+            # compute the log likelihood loss
+            llh = log_likelihood(gen, type='Gaussian')
+            loss = -llh.mean()-logdet
+            optimizer.zero_grad()
+            loss.backward(retain_graph=True)
+            optimizer.step()
+            if scheduler is not None:
+                scheduler.step()
+            
+        # ----------------- moniter loss -----------------
+        if _wandb:
+            wandb.log({'loss': loss.item()})
+        # ----------------- moniter loss -----------------
+            
+        # ----------------- test the model -----------------
+        model.eval()
+        
+        # test the model
+        pre = next(iter(test_loader))[0].to(device)
+        cond_test = pre[:,-cond_dim:]
+        data_test = pre[:,:-cond_dim]
+        
+        gen_test, _ = model(data_test, cond_test)
+        
+        # plot the generated data
+        z = torch.randn(data_test.shape[0], data_test.shape[1]).to(device)
+        gen_test = model.inverse(z, cond_test)
+        re_data = torch.cat((gen_test, cond_test), dim=1)
+        re_data = re_data.detach()
+        
+        orig_data_pre = scaler.inverse_transform(pre.cpu().detach().numpy())
+        orig_data_re = scaler.inverse_transform(re_data.cpu().detach().numpy())
+
+        # comput energy distance
+        _dis1 = MMD_kernel(orig_data_pre, orig_data_re)
+        if _wandb:
+             wandb.log({
+                'epoch': epoch,
+                'MMD': _dis1,
+                'loss': loss.item(),
+            })
+    
+        # ----------------- test the model -----------------
+        
+        # ----------------- plot the generated data -----------------
+        if _plot:
+            if epoch % pgap ==0: 
+                save_path = path + 'FCPflow_generated.png'
+                plot_figure(pre, re_data, scaler, cond_dim, save_path)
         # ----------------- plot the generated data -----------------
