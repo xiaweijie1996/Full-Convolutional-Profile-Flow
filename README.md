@@ -73,7 +73,7 @@ pipeline._define_learning_set()
 pipeline._define_model()
 
 # Train the model
-pipeline.train_model(1, np_array, None, save_path, device='cpu', train_scheduler=False)
+pipeline.train_model(1, np_array[:20,:], None, save_path, device='cpu', train_scheduler=False)
 
 # Load the trained model
 model_path = save_path + 'FCPflow_model.pth'
