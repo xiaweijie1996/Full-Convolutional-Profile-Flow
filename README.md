@@ -65,7 +65,7 @@ pipeline = FCPflowPipeline(
 # Define the save path
 save_path = ''  # Directory where model and outputs will be saved
 
-# Prepare the data
+# Prepare the data (this data is provide in path 'data/nl_data_1household.csv' in repository)
 data_path = 'nl_data_1household.csv'
 np_array = pd.read_csv(data_path).iloc[:, 3:-2].values
 np_array = np_array[~pd.isna(np_array).any(axis=1)]
