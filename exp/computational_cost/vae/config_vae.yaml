@@ -3,7 +3,7 @@ VAE:
   input_shape: 24
   cond_dim: 24
   latent_dim: 12
-  hidden_dim: 96
+  hidden_dim: 50
   condition_dim: 1
 
   #--------Define the training--------

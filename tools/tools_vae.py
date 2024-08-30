@@ -32,7 +32,7 @@ def train_vae(model, dataloader, optimizer, scaler, latent_dim, cond_dim, device
             optimizer.step()
             
         # Print the loss
-        print(f'Epoch {epoch}, Generator Loss: {loss.item()}')
+        # print(f'Epoch {epoch}, Generator Loss: {loss.item()}')
         
         # Evaluation and Logging
         model.eval()
@@ -51,15 +51,15 @@ def train_vae(model, dataloader, optimizer, scaler, latent_dim, cond_dim, device
         
         # Compute the MMD (Maximum Mean Discrepancy)
         _dis1 = MMD_kernel(orig_data_pre, orig_data_re)
-        _dis2 = calculate_w_distances(orig_data_pre, orig_data_re)
-        _dis3 = calculate_energy_distances(orig_data_pre, orig_data_re)
-        _dis5 = ks_distance(orig_data_pre, orig_data_re)
+        # _dis2 = calculate_w_distances(orig_data_pre, orig_data_re)
+        # _dis3 = calculate_energy_distances(orig_data_pre, orig_data_re)
+        # _dis5 = ks_distance(orig_data_pre, orig_data_re)
 
 
         # Save plots every 100 epochs
-        if epoch % 100 == 0:
-            save_path = os.path.join(path, 'vae.png')
-            tl.plot_figure(pre, re_data, scaler, cond_dim, save_path)
+        # if epoch % 100 == 0:
+        #     save_path = os.path.join(path, 'vae.png')
+        #     tl.plot_figure(pre, re_data, scaler, cond_dim, save_path)
             
                     
         if log_wandb:
@@ -67,10 +67,10 @@ def train_vae(model, dataloader, optimizer, scaler, latent_dim, cond_dim, device
                 'time': time.time() - start_time,
                 'epoch': epoch,
                 'MMD': _dis1,
-                'Wasserstein': _dis2,
-                'Energy': _dis3,
-                # 'Autocorrelation': _dis4,
-                'KS': _dis5,
+                # 'Wasserstein': _dis2,
+                # 'Energy': _dis3,
+                # # 'Autocorrelation': _dis4,
+                # 'KS': _dis5,
                 'loss': loss.item(),
             })
             

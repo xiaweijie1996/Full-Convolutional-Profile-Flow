@@ -75,11 +75,12 @@ pipeline._define_model()
 # Train the model
 pipeline.train_model(1, np_array[:20,:], None, save_path, device='cpu', train_scheduler=False)
 
-# Load the trained model
+# Load the trained model (If you have trained model, you can directly load)
 model_path = save_path + 'FCPflow_model.pth'
 model = pipeline.load_model(model_path)
 
-# Process the data for prediction
+# This step is neccessary as we scale the data in trianing
+# In thes step we fit a scaler
 pipeline.data_processing(np_array, None)
 
 # Sample from the trained model
