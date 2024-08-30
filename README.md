@@ -25,7 +25,9 @@ We highly recommend going through these tutorials in the order listed above to g
 
 ## Code of Other Models
 
-For the code of t-Copula used in the paper, please check: [t-Copula](https://github.com/MauricioSalazare/multi-copula)
+All algoritm is available in [Algorithms](alg).
+
+For the original code of t-Copula used in the paper, please check: [t-Copula](https://github.com/MauricioSalazare/multi-copula).
 
 For the of GAN, VAE, etc, please check: [Generative models](https://github.com/xiaweijie1996/Generative-Models-for-Customer-Profile-Generation).
 
