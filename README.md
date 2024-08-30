@@ -8,7 +8,8 @@ Welcome to the repository containing the implementation of algorithms from the p
 
 - We have provided detailed tutorials for you to undershtand our model, check at [Tutorials](tutorials).
 - All process data for this project are available at [Data](data).
-- To reproduce all experiments in our paper, check [Exp](exp).
+- To reproduce experiments in our paper, check [Exp](exp).
+- **HOW TO TRAIN YOUR OWN FCPflow?** Check below.
 
 ## Tutorials
 
@@ -68,7 +69,7 @@ np_array = pd.read_csv(data_path).iloc[:, 3:-2].values
 np_array = np_array[~pd.isna(np_array).any(axis=1)]
 np_array = np.hstack((np_array, np.ones((np_array.shape[0], 1))))
 
-# Define the learning set and the model
+# Define the learning set and the model 
 pipeline._define_learning_set()
 pipeline._define_model()
 
