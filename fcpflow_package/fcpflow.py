@@ -38,6 +38,10 @@ class FCPflowPipeline:
         w_decay: Union[int, float] = 0.0,
         batch_size: Union[int, float] = 2000,
         ggap: Union[int, float] = 100,
+        #--------Wether to save the model--------
+        figure_save: Union[bool, float] = True,
+        model_save: Union[bool, float] = True,
+        
         ):
         
         self.lr_min = lr_min
@@ -46,6 +50,8 @@ class FCPflowPipeline:
         self.w_decay = w_decay
         self.batch_size = batch_size
         self.ggap = ggap
+        self.figure_save = figure_save
+        self.model_save = model_save
         print('Learning set defined')
     
     def _define_model(self):
@@ -81,7 +87,7 @@ class FCPflowPipeline:
         else:
             scheduler = None
         tl.train( save_path,self.model, self.dataloader_train, optimizer, num_epochs, self.condition_dim, 
-                device, self.scaler, self.dataloader_test, scheduler, self.ggap, _wandb=False, _plot=True, _save=True)
+                device, self.scaler, self.dataloader_test, scheduler, self.ggap, _wandb=False, _plot=self.figure_save, _save=self.model_save)
         
         print('Model trained')
     
@@ -133,7 +139,7 @@ if __name__ == "__main__":
     np_array = np_array[~pd.isna(np_array).any(axis=1)]
     np_array = np.hstack((np_array, np.ones((np_array.shape[0], 1))))
     
-    pipeline.train_model(1, np_array, None, save_path, device='cpu', train_scheduler=False)
+    pipeline.train_model(10, np_array, None, save_path, device='cpu', train_scheduler=False)
     
     model_path = save_path +'FCPflow_model.pth'
     model = pipeline.load_model(model_path)

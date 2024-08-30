@@ -43,11 +43,11 @@ optimizer = torch.optim.Adam(model.parameters(), lr=config['NICE']['lr_max'], we
 scheduler = None
 
 # define the wandb
-# wandb.init(project="com_cost")
-# wandb.log({"number of parameters": sum(p.numel() for p in model.parameters() if p.requires_grad)})
+wandb.init(project="com_cost")
+wandb.log({"number of parameters": sum(p.numel() for p in model.parameters() if p.requires_grad)})
 
 # train the model
 path = os.path.join(_parent_path, 'exp/computational_cost/nice')
-tn.train_com_cost(path, model, dataloader, optimizer, 1000001, config['NICE']['condition_dim'], 
-                  device, scaler, dataloader, scheduler, 100, False)
+tn.train_com_cost(path, model, dataloader, optimizer, 400001, config['NICE']['condition_dim'], 
+                  device, scaler, dataloader, scheduler, 100, True)
 

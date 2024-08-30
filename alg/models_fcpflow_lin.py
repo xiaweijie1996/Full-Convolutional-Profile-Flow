@@ -12,24 +12,37 @@ class InvertibleNorm(nn.Module):
         # Initialize running_mean and running_std as buffers to be part of the model's state
         self.register_buffer('running_mean', torch.zeros(1, num_channels, 1))
         self.register_buffer('running_std', torch.ones(1, num_channels, 1))
+        self.momentum = 0.1
         
     def forward(self, input):
-        self.running_mean = torch.mean(input, dim=[0, 2], keepdim=True)
-        self.running_std = torch.std(input, dim=[0, 2], keepdim=True)
+        if self.training:
+            mean = torch.mean(input, dim=[0, 2], keepdim=True)
+            std = torch.std(input, dim=[0, 2], keepdim=True)+1e-15
+            
+            # Normalize input using calculated mean and std dev
+            normalized_input = (input - mean) / (std)
+            
+            self.running_mean = (1 - self.momentum) * self.running_mean + self.momentum * mean # update running mean
+            self.running_std = (1 - self.momentum) * self.running_std + self.momentum * std # update running std dev
         
-        # Normalize input using calculated mean and std dev
-        normalized_input = (input - self.running_mean) / (self.running_std)
-        
-        # log-determinant of the Jacobian)
-        self.scale = 1 / (self.running_std)
-        log_det = (
-            torch.sum(torch.log(self.scale.squeeze()))
-        )
+            # log-determinant of the Jacobian)
+            self.scale = 1 / (std)
+            log_det = (
+                torch.sum(torch.log(self.scale.squeeze()))
+            )
+        else:
+            # Normalize input using running mean and std dev
+            normalized_input = (input - self.running_mean) / (self.running_std)
+            self.scale = 1 / (self.running_std)
+            log_det = (
+                torch.sum(torch.log(self.scale.squeeze()))
+            )
+            
+
         return normalized_input, log_det
 
     def inverse(self, output):
         device = output.device
-        
         # Use running_mean and running_std for the inverse normalization
         return (output * self.running_std.to(device)) + self.running_mean.to(device)
 
