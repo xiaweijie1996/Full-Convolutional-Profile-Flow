@@ -38,7 +38,6 @@ class InvertibleNorm(nn.Module):
                 torch.sum(torch.log(self.scale.squeeze()))
             )
             
-
         return normalized_input, log_det
 
     def inverse(self, output):
@@ -300,6 +299,7 @@ class FCPflow(nn.Module): # Fully convolutional time flow
 if __name__ == '__main__':
     # check the model
     model = FCPflow(8, 48, 0.3, 48, 48).to('cuda')  
+    model.eval()
     x = torch.randn(604, 48).to('cuda')
 
     condition = torch.randn(604, 48).to('cuda')

@@ -1,3 +1,5 @@
+import os
+
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.preprocessing import StandardScaler, MinMaxScaler  
 import torch
@@ -180,7 +182,7 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
         # ----------------- plot the generated data -----------------
         if _plot:
             if epoch % pgap ==0: 
-                save_path = path + 'FCPflow_generated.png'
+                save_path = os.path.join(path, 'FCPflow_generated.png')
                 plot_figure(pre, re_data, scaler, cond_dim, save_path)
         # ----------------- plot the generated data -----------------
 
@@ -274,7 +276,7 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
         # ----------------- test the model -----------------
         model.eval()
 
-        # print('epoch: ', epoch, 'loss: ', loss.item())
+        print('epoch: ', epoch, 'loss: ', loss.item())
 
         # plot the generated data
         z = torch.randn(data.shape[0], data.shape[1]).to(device)
@@ -288,7 +290,6 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
         # comput energy distance
         _dis1 = MMD_kernel(orig_data_pre, orig_data_re)
 
-
         if _wandb:
              wandb.log({
                 'time': time.time() - start_time,
@@ -299,13 +300,18 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
         # ----------------- test the model -----------------
 
         # ----------------- plot the generated data -----------------
-        # if epoch % pgap ==0: 
-        #     save_path = path + '/FCPflow_generated.png'
-        #     plot_figure(pre, re_data, scaler, cond_dim, save_path)
+        if epoch % pgap ==0: 
+            save_path = os.path.join(path, 'FCPflow_generated.png')
+            plot_figure(pre, re_data, scaler, cond_dim, save_path)
         # ----------------- plot the generated data -----------------
 
+
+
+
+
+
 def train_data_ana(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, 
-                   scheduler, pgap=100, _wandb=True, _plot=False, _save=False):
+                   scheduler, pgap=100, _wandb=True, _plot=True, _save=False):
     model.train()
     for epoch in range(epochs):
         for _, data in enumerate(train_loader):
@@ -322,14 +328,20 @@ def train_data_ana(path, model, train_loader, optimizer, epochs, cond_dim ,devic
             llh = log_likelihood(gen, type='Gaussian')
             loss = -llh.mean()-logdet
             optimizer.zero_grad()
-            loss.backward(retain_graph=True)
+            loss.backward()
             optimizer.step()
             if scheduler is not None:
                 scheduler.step()
             
         # ----------------- moniter loss -----------------
-        if _wandb:
-            wandb.log({'loss': loss.item()})
+        print(epoch, 'loss: ', loss.item())
+        # if _wandb:
+        #     wandb.log({'loss': loss.item()})
+        # get the model size
+        # if epoch % 100 == 0:
+        #     print(epoch, 'loss: ', loss.item())
+        #     print(torch.cuda.memory_summary(device=None, abbreviated=False))
+
         # ----------------- moniter loss -----------------
             
         # ----------------- test the model -----------------
@@ -365,6 +377,7 @@ def train_data_ana(path, model, train_loader, optimizer, epochs, cond_dim ,devic
         # ----------------- plot the generated data -----------------
         if _plot:
             if epoch % pgap ==0: 
-                save_path = path + 'FCPflow_generated.png'
+                save_path = os.path.join(path, 'FCPflow_generated.png')
                 plot_figure(pre, re_data, scaler, cond_dim, save_path)
+                
         # ----------------- plot the generated data -----------------

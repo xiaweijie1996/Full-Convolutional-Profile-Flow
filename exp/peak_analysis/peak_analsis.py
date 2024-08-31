@@ -49,8 +49,8 @@ def plot_peak_times(results, resolution, country, models):
         plt.xticks(fontsize=_size-4)
         plt.yticks(fontsize=_size-4)
         ave_points.append((avg_peak_time_in_hours, avg_peak_value))
-    plt.xlabel('Time of Day (Hours)', fontproperties=font_prop, fontsize=_size)
-    plt.ylabel('Peak Value',  fontproperties=font_prop, fontsize=_size, labelpad=5)
+    plt.xlabel('Time of Day [Hours]', fontproperties=font_prop, fontsize=_size)
+    plt.ylabel('Peak Value [kWh]',  fontproperties=font_prop, fontsize=_size, labelpad=5)
     # plt.title(f'Peak Values and Peak Times for {country.upper()} Data', fontproperties=font_prop, fontsize=_size)
     plt.legend(loc='upper right', prop=font_prop, fontsize=_size)
     plt.grid(True)
@@ -80,7 +80,7 @@ gmm_data = pd.read_csv(path_gmm, index_col=0).values
 wgan_data = pd.read_csv(path_wgan, index_col=0).values
 data_original, copula_data, fcpflow_data, gmm_data, wgan_data = sampler(data_original, copula_data, fcpflow_data, gmm_data, wgan_data, num_samples=1000)
 original_max_vi = get_max_and_index(data_original, copula_data, fcpflow_data, gmm_data, wgan_data)
-models = ['Original', 'Copula', 'FCPFlow', 'GMM', 'WGAN-gp']
+models = ['Original', 'Copula', 'FCPFlow', 'GMM', 'WGAN-GP']
 ave_points = plot_peak_times(original_max_vi, 15, 'ge', models)
 compute_dis(ave_points,  models=models)
 # ---------- analysis the peak of the of ge data ----------
