@@ -48,4 +48,4 @@ wandb.init(project="com_cost")
 wandb.log({"number of parameters": parem})
 
 # ------------------- train the model -------------------
-tvae.train_vae(model, dataloader, optimizer, scaler, latent_dim, cond_dim, device, _parent_path, epochs=400001, log_wandb=True)
+tvae.train_vae(model, dataloader, optimizer, scaler, latent_dim, cond_dim, device, _parent_path, epochs=260000, log_wandb=True)

@@ -13,15 +13,6 @@ from tools.evaluation_m import MMD_kernel, calculate_w_distances, calculate_ener
 torch.set_default_dtype(torch.float64)
 
 def create_data_loader(numpy_array, batch_size=32, shuffle=True):
-    """
-    Converts a NumPy array to a PyTorch DataLoader.
-    Parameters:
-    numpy_array (np.ndarray): The input data in NumPy array format.
-    batch_size (int): Size of each batch in the DataLoader.
-    shuffle (bool): Whether to shuffle the data.
-    Returns:
-    DataLoader: A PyTorch DataLoader containing the input data.
-    """ 
     # check if nan exists in the data, if nan drop
     if np.isnan(numpy_array).any():
         print('There are nan in the data, drop them')

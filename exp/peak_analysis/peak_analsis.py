@@ -67,87 +67,86 @@ def compute_dis(args, models):
         print(f'Euclidean distance between Original and {models[i]}: {np.mean(eud):.2f}')
         i += 1
 
-# ---------- analysis the peak of the of ge data ----------
-path_original = 'data/ge_data_ind.csv'
-path_copula = 'exp/peak_analysis/data/ge/copula_samples_ge.csv'
-path_fcpflow = 'exp/peak_analysis/data/ge/fctflow_samples_ge.csv'
-path_gmm = 'exp/peak_analysis/data/ge/gmm_samples_ge.csv'
-path_wgan = 'exp/peak_analysis/data/ge/wgan_samples_ge.csv'
-data_original = pd.read_csv(path_original).values
-copula_data = pd.read_csv(path_copula, index_col=0).values
-fcpflow_data = pd.read_csv(path_fcpflow, index_col=0).values
-gmm_data = pd.read_csv(path_gmm, index_col=0).values
-wgan_data = pd.read_csv(path_wgan, index_col=0).values
-data_original, copula_data, fcpflow_data, gmm_data, wgan_data = sampler(data_original, copula_data, fcpflow_data, gmm_data, wgan_data, num_samples=1000)
-original_max_vi = get_max_and_index(data_original, copula_data, fcpflow_data, gmm_data, wgan_data)
-models = ['Original', 'Copula', 'FCPFlow', 'GMM', 'WGAN-GP']
-ave_points = plot_peak_times(original_max_vi, 15, 'ge', models)
-compute_dis(ave_points,  models=models)
-# ---------- analysis the peak of the of ge data ----------
+# # ---------- analysis the peak of the of ge data ----------
+# path_original = 'data/ge_data_ind.csv'
+# path_copula = 'exp/peak_analysis/data/ge/copula_samples_ge.csv'
+# path_fcpflow = 'exp/peak_analysis/data/ge/fctflow_samples_ge.csv'
+# path_gmm = 'exp/peak_analysis/data/ge/gmm_samples_ge.csv'
+# path_wgan = 'exp/peak_analysis/data/ge/wgan_samples_ge.csv'
+# data_original = pd.read_csv(path_original).values
+# copula_data = pd.read_csv(path_copula, index_col=0).values
+# fcpflow_data = pd.read_csv(path_fcpflow, index_col=0).values
+# gmm_data = pd.read_csv(path_gmm, index_col=0).values
+# wgan_data = pd.read_csv(path_wgan, index_col=0).values
+# data_original, copula_data, fcpflow_data, gmm_data, wgan_data = sampler(data_original, copula_data, fcpflow_data, gmm_data, wgan_data, num_samples=1000)
+# original_max_vi = get_max_and_index(data_original, copula_data, fcpflow_data, gmm_data, wgan_data)
+# models = ['Original', 'Copula', 'FCPFlow', 'GMM', 'WGAN-GP']
+# ave_points = plot_peak_times(original_max_vi, 15, 'ge', models)
+# compute_dis(ave_points,  models=models)
+# # ---------- analysis the peak of the of ge data ----------
 
+# # ---------- analysis the peak of the of nl data ----------
+# path_original = 'data/nl_data_cleaned_annual_test.csv'
+# path_copula = 'exp/peak_analysis/data/nl/copula_samples_nl.csv'
+# path_fcpflow = 'exp/peak_analysis/data/nl/fctflow_samples_nl.csv'
+# data_original = pd.read_csv(path_original, index_col=0).iloc[:, 2:-2].values
+# data_original = data_original[~pd.isna(data_original).any(axis=1)]
+# data_copula = pd.read_csv(path_copula, index_col=0).iloc[:, :-2].values
+# data_fcpflow = pd.read_csv(path_fcpflow, index_col=0).iloc[:, :-2].values
+# data_original, data_copula, data_fcpflow = sampler(data_original, data_copula, data_fcpflow, num_samples=1000)
+# print(data_original.shape, data_copula.shape, data_fcpflow.shape)
+# original_max_vi = get_max_and_index(data_original, data_copula, data_fcpflow)
+# models = ['Original', 'Copula', 'FCPFlow']
+# ave_points = plot_peak_times(original_max_vi, 60, 'nl', models)
+# compute_dis(ave_points, models)
+# # ---------- analysis the peak of the of nl data ----------
 
-# ---------- analysis the peak of the of nl data ----------
-path_original = 'data/nl_data_cleaned_annual_test.csv'
-path_copula = 'exp/peak_analysis/data/nl/copula_samples_nl.csv'
-path_fcpflow = 'exp/peak_analysis/data/nl/fctflow_samples_nl.csv'
-data_original = pd.read_csv(path_original, index_col=0).iloc[:, 2:-2].values
-data_original = data_original[~pd.isna(data_original).any(axis=1)]
-data_copula = pd.read_csv(path_copula, index_col=0).iloc[:, :-2].values
-data_fcpflow = pd.read_csv(path_fcpflow, index_col=0).iloc[:, :-2].values
-data_original, data_copula, data_fcpflow = sampler(data_original, data_copula, data_fcpflow, num_samples=1000)
-print(data_original.shape, data_copula.shape, data_fcpflow.shape)
-original_max_vi = get_max_and_index(data_original, data_copula, data_fcpflow)
-models = ['Original', 'Copula', 'FCPFlow']
-ave_points = plot_peak_times(original_max_vi, 60, 'nl', models)
-compute_dis(ave_points, models)
-# ---------- analysis the peak of the of nl data ----------
+# # ---------- analysis the peak of the of uk data ----------
+# path_original = 'data/uk_data_cleaned_ind_test.csv'
+# path_copula = 'exp/peak_analysis/data/uk/copula_samples_uk.csv'
+# path_fcpflow = 'exp/peak_analysis/data/uk/fctflow_samples_uk.csv'
+# data_original = pd.read_csv(path_original, index_col=0).iloc[:, :-2].values
+# data_original = data_original[~pd.isna(data_original).any(axis=1)]
+# data_copula = pd.read_csv(path_copula, index_col=0).iloc[:, :-2].values
+# data_fcpflow = pd.read_csv(path_fcpflow, index_col=0).iloc[:, :-2].values
+# data_original, data_copula, data_fcpflow = sampler(data_original, data_copula, data_fcpflow, num_samples=1000)
+# print(data_original.shape, data_copula.shape, data_fcpflow.shape)
+# original_max_vi = get_max_and_index(data_original, data_copula, data_fcpflow)
+# models = ['Original', 'Copula', 'FCPFlow']
+# ave_points = plot_peak_times(original_max_vi, 30, 'uk', models)
+# compute_dis(ave_points, models)
+# # ---------- analysis the peak of the of uk data ----------
 
-# ---------- analysis the peak of the of uk data ----------
-path_original = 'data/uk_data_cleaned_ind_test.csv'
-path_copula = 'exp/peak_analysis/data/uk/copula_samples_uk.csv'
-path_fcpflow = 'exp/peak_analysis/data/uk/fctflow_samples_uk.csv'
-data_original = pd.read_csv(path_original, index_col=0).iloc[:, :-2].values
-data_original = data_original[~pd.isna(data_original).any(axis=1)]
-data_copula = pd.read_csv(path_copula, index_col=0).iloc[:, :-2].values
-data_fcpflow = pd.read_csv(path_fcpflow, index_col=0).iloc[:, :-2].values
-data_original, data_copula, data_fcpflow = sampler(data_original, data_copula, data_fcpflow, num_samples=1000)
-print(data_original.shape, data_copula.shape, data_fcpflow.shape)
-original_max_vi = get_max_and_index(data_original, data_copula, data_fcpflow)
-models = ['Original', 'Copula', 'FCPFlow']
-ave_points = plot_peak_times(original_max_vi, 30, 'uk', models)
-compute_dis(ave_points, models)
-# ---------- analysis the peak of the of uk data ----------
+# # ---------- analysis the peak of the of aus data ----------
+# path_original = 'data/aus_data_cleaned_annual_test.csv'
+# path_copula = 'exp/peak_analysis/data/aus/copula_samples_aus.csv'
+# path_fcpflow = 'exp/peak_analysis/data/aus/fctflow_samples_aus.csv'
+# data_original = pd.read_csv(path_original, index_col=0).iloc[:, 2:-2].values
+# data_copula = pd.read_csv(path_copula, index_col=0).iloc[:, :-2].values
+# data_fcpflow = pd.read_csv(path_fcpflow, index_col=0).iloc[:, :-2].values
+# data_original, data_copula, data_fcpflow = sampler(data_original, data_copula, data_fcpflow, num_samples=1000)
+# print(data_original.shape, data_copula.shape, data_fcpflow.shape)
+# original_max_vi = get_max_and_index(data_original, data_copula, data_fcpflow)
+# models = ['Original', 'Copula', 'FCPFlow']
+# ave_points = plot_peak_times(original_max_vi, 30, 'aus', models)
+# compute_dis(ave_points, models)
+# # ---------- analysis the peak of the of aus data ----------
 
-# ---------- analysis the peak of the of aus data ----------
-path_original = 'data/aus_data_cleaned_annual_test.csv'
-path_copula = 'exp/peak_analysis/data/aus/copula_samples_aus.csv'
-path_fcpflow = 'exp/peak_analysis/data/aus/fctflow_samples_aus.csv'
-data_original = pd.read_csv(path_original, index_col=0).iloc[:, 2:-2].values
-data_copula = pd.read_csv(path_copula, index_col=0).iloc[:, :-2].values
-data_fcpflow = pd.read_csv(path_fcpflow, index_col=0).iloc[:, :-2].values
-data_original, data_copula, data_fcpflow = sampler(data_original, data_copula, data_fcpflow, num_samples=1000)
-print(data_original.shape, data_copula.shape, data_fcpflow.shape)
-original_max_vi = get_max_and_index(data_original, data_copula, data_fcpflow)
-models = ['Original', 'Copula', 'FCPFlow']
-ave_points = plot_peak_times(original_max_vi, 30, 'aus', models)
-compute_dis(ave_points, models)
-# ---------- analysis the peak of the of aus data ----------
-
-# ---------- analysis the peak of the of usa data ----------
-path_original = 'data/usa_data_cleaned_annual_test.csv'
-path_copula = 'exp/peak_analysis/data/usa/copula_samples_usa.csv'
-path_fcpflow = 'exp/peak_analysis/data/usa/fctflow_samples_usa.csv'
-data_original = pd.read_csv(path_original, index_col=0).iloc[:, :-2].values
-data_copula = pd.read_csv(path_copula, index_col=0).iloc[:, :-2].values
-data_fcpflow = pd.read_csv(path_fcpflow, index_col=0).iloc[:, :-2].values
-data_original = data_original[~pd.isna(data_original).any(axis=1)]
-data_original, data_copula, data_fcpflow = sampler(data_original, data_copula, data_fcpflow, num_samples=1000)
-print(data_original.shape, data_copula.shape, data_fcpflow.shape)
-original_max_vi = get_max_and_index(data_original, data_copula, data_fcpflow)
-models = ['Original', 'Copula', 'FCPFlow']
-ave_points = plot_peak_times(original_max_vi, 15, 'usa', models)
-compute_dis(ave_points, models)
-# ---------- analysis the peak of the of usa data ----------
+# # ---------- analysis the peak of the of usa data ----------
+# path_original = 'data/usa_data_cleaned_annual_test.csv'
+# path_copula = 'exp/peak_analysis/data/usa/copula_samples_usa.csv'
+# path_fcpflow = 'exp/peak_analysis/data/usa/fctflow_samples_usa.csv'
+# data_original = pd.read_csv(path_original, index_col=0).iloc[:, :-2].values
+# data_copula = pd.read_csv(path_copula, index_col=0).iloc[:, :-2].values
+# data_fcpflow = pd.read_csv(path_fcpflow, index_col=0).iloc[:, :-2].values
+# data_original = data_original[~pd.isna(data_original).any(axis=1)]
+# data_original, data_copula, data_fcpflow = sampler(data_original, data_copula, data_fcpflow, num_samples=1000)
+# print(data_original.shape, data_copula.shape, data_fcpflow.shape)
+# original_max_vi = get_max_and_index(data_original, data_copula, data_fcpflow)
+# models = ['Original', 'Copula', 'FCPFlow']
+# ave_points = plot_peak_times(original_max_vi, 15, 'usa', models)
+# compute_dis(ave_points, models)
+# # ---------- analysis the peak of the of usa data ----------
 
 # ---------- analysis the peak of the of uk weather data ----------
 path_original = 'data/uk_data_cleaned_ind_weather_test.csv'

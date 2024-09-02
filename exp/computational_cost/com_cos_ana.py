@@ -89,7 +89,7 @@ for model in models:
 
 # ------------MMD Comparison IN Time------------
 # Use time as the x-axis to plot the MMD values
-max_time = data_mmd['VAE - estimated time'].max()  # Set this to the maximum time you want to consider
+max_time = data_mmd['FCPFLOW - estimated time'].max()  # Set this to the maximum time you want to consider
 
 plt.figure(figsize=(9, 4.6))
 for i, model in enumerate(models):
