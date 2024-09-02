@@ -3,6 +3,7 @@ import pandas as pd
 from scipy.stats import kendalltau, ks_2samp, energy_distance, wasserstein_distance
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics.pairwise import euclidean_distances
+import torch
 
 def calculate_energy_distances(dataset1, dataset2, num_samples=1000):
     """
@@ -108,3 +109,19 @@ def compute_mse(pre_data, true_data):
     mean_pre = np.mean(pre_data, axis=0)
     mean_true = np.mean(true_data, axis=0)
     return mean_squared_error(mean_pre, mean_true)
+
+
+def pinball_loss(y_true, y_pred, quantile):
+    """
+    Calculate the pinball loss for a specific quantile.
+
+    Args:
+        y_true (Tensor): The actual values.
+        y_pred (Tensor): The predicted quantile values.
+        quantile (float): The quantile to calculate the loss for (e.g., 0.1, 0.5, 0.9).
+
+    Returns:
+        Tensor: The pinball loss.
+    """
+    delta = y_true - y_pred
+    return torch.mean(torch.max(quantile * delta, (quantile - 1) * delta))

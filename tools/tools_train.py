@@ -8,7 +8,7 @@ import numpy as np
 import wandb
 import time
 
-from tools.evaluation_m import MMD_kernel, calculate_w_distances, calculate_energy_distances, ks_distance
+from tools.evaluation_m import MMD_kernel, pinball_loss
 
 torch.set_default_dtype(torch.float64)
 
@@ -93,20 +93,19 @@ def plot_figure(pre, re_data, scaler, con_dim, path='Generated Data Comparison.p
     plt.savefig(path)
     plt.close()
 
-def plot_pre(pre, re_data, scaler, con_dim, path='Generated Data Comparison.png'):
+def plot_pre(pre, re_data, scaler, con_dim, _sample_index=0 ,path='Generated Data Comparison.png'):
     # Inverse transform to get the original scale of the data
     orig_data_pre = scaler.inverse_transform(pre.cpu().detach().numpy())
     orig_data_re = scaler.inverse_transform(re_data.cpu().detach().numpy())
     
-    _real_pre = orig_data_pre[0, -con_dim:]
-    _cond = orig_data_pre[0, -con_dim:]
-    predict_pre = orig_data_re[:, :-con_dim]
+    _real_pre = orig_data_pre[_sample_index, -con_dim:]
+    _cond = orig_data_pre[_sample_index, -con_dim:]
+    predict_pre = orig_data_re[_sample_index, :-con_dim]
 
     # plot the real data
     _len_con, _len_pre = len(_cond), len(_real_pre)
     plt.plot(range(0, _len_con), _cond, color='blue', label='Real condition')
-    for i in range(predict_pre.shape[0]):
-        plt.plot(range(_len_con, _len_con + _len_pre), predict_pre[i], alpha=0.01, color='green')
+    plt.plot(range(_len_con, _len_con + _len_pre), predict_pre, alpha=0.5, color='green')
     plt.plot(range(_len_con, _len_con+_len_pre), _real_pre, color='yellow', label='Real data')
     
     plt.legend()
@@ -179,8 +178,7 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
 
 def train_pre(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True):
     model.train()
-    loss_mid = 0
-    energy_mid = 100
+    loss_mid = 100000
     for epoch in range(epochs):
         for _, data in enumerate(train_loader):
             model.train()
@@ -196,13 +194,12 @@ def train_pre(path, model, train_loader, optimizer, epochs, cond_dim ,device, sc
             llh = log_likelihood(gen, type='Gaussian')
             loss = -llh.mean()-logdet
             optimizer.zero_grad()
-            loss.backward(retain_graph=True)
+            loss.backward()
             optimizer.step()
             if scheduler is not None:
                 scheduler.step()
 
         # ----------------- moniter loss -----------------
-        print(epoch, 'loss: ', loss.item())
         if _wandb:
             wandb.log({'loss': loss.item()})
         # ----------------- moniter loss -----------------
@@ -216,29 +213,47 @@ def train_pre(path, model, train_loader, optimizer, epochs, cond_dim ,device, sc
         cond_test = pre[:,:-cond_dim]
 
         gen_test, logdet_test = model(data_test, cond_test)
-        llh_test = log_likelihood(gen_test, type='Gaussian')
-        loss_test = -llh_test.mean()-logdet_test
+        pre_orig = scaler.inverse_transform(pre.cpu().detach().numpy())
 
+        quantiles = [0.1, 0.5, 0.9]
+        y_true = torch.tensor(pre_orig)
+        losses = []
+        
+        for quantile in quantiles:
+            # Generate multiple predictions or sample z multiple times
+            predictions = []
+            for _ in range(100):  # Example: generate 100 samples for quantile estimation
+                z = torch.randn(data_test.shape[0], data_test.shape[1]).to(device)
+                gen_test = model.inverse(z, cond_test)
+                re_data = torch.cat((gen_test, cond_test), dim=1)
+                re_data_orig = scaler.inverse_transform(re_data.cpu().detach().numpy())
+                predictions.append(re_data_orig)
+
+            # Stack predictions and calculate the quantile prediction
+            predictions = np.stack(predictions)
+            y_pred = np.percentile(predictions, quantile * 100, axis=0)
+
+            # Convert y_pred to torch tensor
+            y_pred = torch.tensor(y_pred, dtype=torch.float32)
+
+            # Calculate the pinball loss for this quantile
+            loss = pinball_loss(y_true, y_pred, quantile)
+            losses.append(loss.item())
+            
+        quantile_loss = np.mean(losses)
+
+        print('epoch: ', epoch, 'loss: ', loss.item(), 'quantile loss: ', quantile_loss)
         # save the model
-        if loss_test.item() < loss_mid:
+        if quantile_loss < loss_mid:
+            print('save the model')
             save_path = path + '/FCPflow_model.pth'
             torch.save(model.state_dict(), save_path)
-            loss_mid = loss_test.item()
-
-
-        # plot the generated data
-        z = torch.randn(100, data_test.shape[1]).to(device)
-        _cond = cond_test[0].repeat(100, 1)
-
-        cond_test = _cond
-        gen_test = model.inverse(z, cond_test)
-        re_data = torch.cat((gen_test, cond_test), dim=1)
-        re_data = re_data.detach()
+            loss_mid = quantile_loss
 
         # ----------------- plot the generated data -----------------
         if epoch % pgap ==0: 
             save_path = path + '/FCPflow_generated.png'
-            plot_pre(pre, re_data, scaler, cond_dim, save_path)
+            plot_pre(pre, re_data, scaler, cond_dim, 0, save_path)
         # ----------------- plot the generated data -----------------
 
 def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True):
@@ -295,10 +310,6 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
             save_path = os.path.join(path, 'FCPflow_generated.png')
             plot_figure(pre, re_data, scaler, cond_dim, save_path)
         # ----------------- plot the generated data -----------------
-
-
-
-
 
 
 def train_data_ana(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, 
