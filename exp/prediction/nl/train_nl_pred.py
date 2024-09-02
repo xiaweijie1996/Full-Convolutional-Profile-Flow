@@ -44,10 +44,6 @@ scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, step_size_up=config['FC
                                               base_lr=config['FCPflow']['lr_min'], max_lr=config['FCPflow']['lr_max'],
                                               cycle_momentum=False )
 
-# define the wandb
-# wandb.init(project="fcpflow_usa_pre")
-# wandb.watch(model)
-
 # train the model
 path = os.path.join(_parent_path, 'exp/prediction/nl')
 tl.train_pre(path, model, dataloader_train, optimizer, 4000001, config['FCPflow']['condition_dim'], 

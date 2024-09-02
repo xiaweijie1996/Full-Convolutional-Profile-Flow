@@ -79,3 +79,32 @@ def MMD_kernel(a, b, bandwidths = [0.5, 1, 5, 10]):
     kernels_b = np.mean([gaussian_kernel(b, b, bandwidth) for bandwidth in bandwidths], axis=0)
     kernels_ab = np.mean([gaussian_kernel(a, b, bandwidth) for bandwidth in bandwidths], axis=0)
     return np.mean(kernels_a) + np.mean(kernels_b) - 2*np.mean(kernels_ab)
+
+def compute_quantile(pre_data):
+    q = np.arange(0.01, 1, 0.01)
+    quantile_value = np.quantile(pre_data, q, axis=0)
+    return quantile_value 
+
+def pinball_loss_compute(y, f, q):
+    if y >= f:
+        return (y - f) * q
+    else:
+        return (f - y) * (1 - q)
+    
+def plloss(pre_data, true_data):
+
+    quantile_values = compute_quantile(pre_data)
+    q = np.arange(0.01, 1, 0.01)
+    
+    loss = []
+    for i in range(len(q)):
+        ind_loss = [pinball_loss_compute(y, f, q[i]) for y, f in zip(true_data, quantile_values[i,:])]
+        loss.append(np.mean(ind_loss))
+    pinball_loss = np.mean(loss)
+
+    return pinball_loss
+
+def compute_mse(pre_data, true_data):
+    mean_pre = np.mean(pre_data, axis=0)
+    mean_true = np.mean(true_data, axis=0)
+    return mean_squared_error(mean_pre, mean_true)
