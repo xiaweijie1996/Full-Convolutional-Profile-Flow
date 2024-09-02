@@ -36,7 +36,7 @@ model.eval()
 _row_peak_indx_max = np.unravel_index(np.argmax(np_array_test[:, 24:]), np_array_test[:, 24:].shape)[0]
 _row_peak_indx_min = _row_peak_indx_max +3
 
-_sample_num = 500
+_sample_num = 100
 z = torch.randn(_sample_num, config['FCPflow']['condition_dim'])
 cond = torch.tensor(np_array_test[_row_peak_indx_max,:24]).view(1,-1).repeat(_sample_num,1)
 re_data = model.inverse(z, cond)

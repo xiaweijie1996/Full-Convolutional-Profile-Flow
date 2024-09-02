@@ -1,6 +1,12 @@
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.font_manager as fm
+
+font_path = 'tools/TIMES.TTF'
+font_prop = fm.FontProperties(fname=font_path)
+plt.rcParams['font.family'] = font_prop.get_name()
+front_size = 15
 
 def plot_pre(pre, re_data, scaler, con_dim, _sample_index=0, path='Generated_Data_Comparison.png'):
     # Inverse transform to get the original scale of the data
@@ -34,9 +40,16 @@ def plot_pre(pre, re_data, scaler, con_dim, _sample_index=0, path='Generated_Dat
     
     # Add grid
     plt.grid(True)
+    plt.xlim(0, _len_con + _len_pre)
+    plt.ylim(0, max(_real_pre) * 1.1)
+    plt.xticks(fontsize=front_size, fontproperties=font_prop)
+    plt.yticks(fontsize=front_size, fontproperties=font_prop)
+    
 
     # Add legend and save the figure
-    plt.legend()
+    plt.xlabel('Time [Hours]', fontsize=front_size, fontproperties=font_prop)
+    plt.ylabel('Consumption [kWh]', fontsize=front_size, fontproperties=font_prop)
+    plt.legend(fontsize=front_size, prop=font_prop)
     plt.savefig(path)
     plt.close()
 
