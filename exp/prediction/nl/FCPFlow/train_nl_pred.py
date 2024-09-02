@@ -43,5 +43,5 @@ scheduler = None
 
 # train the model
 path = os.path.join(_parent_path, 'exp/prediction/nl/FCPFlow')
-tl.train_pre(path, model, dataloader_train, optimizer, 10000, config['FCPflow']['condition_dim'], 
+tl.train_pre_2(path, model, dataloader_train, optimizer, 50000, config['FCPflow']['condition_dim'], 
              device, scaler, dataloader_test, scheduler, 100, False)

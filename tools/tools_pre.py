@@ -7,19 +7,20 @@ def plot_pre(pre, re_data, scaler, con_dim, _sample_index=0, path='Generated_Dat
     orig_data_pre = scaler.inverse_transform(pre.cpu().detach().numpy())
     orig_data_re = scaler.inverse_transform(re_data.cpu().detach().numpy())
     
-    _real_pre = orig_data_pre[_sample_index, -con_dim:]
-    _cond = orig_data_pre[_sample_index, -con_dim:]
-    predict_pre = orig_data_re[:, :-con_dim]
+    _real_pre = orig_data_pre[_sample_index, con_dim:]
+    _cond = orig_data_pre[_sample_index, :con_dim]
+    predict_pre = orig_data_re[:, con_dim:]
     
     # Calculate 95% prediction interval
     lower_bound = np.percentile(predict_pre, 2.5, axis=0)
     upper_bound = np.percentile(predict_pre, 97.5, axis=0)
-    
+
     # Calculate average prediction
     avg_prediction = np.mean(predict_pre, axis=0)
 
     # Plot the real condition and data
     _len_con, _len_pre = len(_cond), len(_real_pre)
+    plt.figure(figsize=(10, 5))
     plt.plot(range(0, _len_con), _cond, color='blue', label='Real condition')
     
     # Plot the 95% prediction interval (light blue)
@@ -40,18 +41,3 @@ def plot_pre(pre, re_data, scaler, con_dim, _sample_index=0, path='Generated_Dat
     plt.close()
 
 
-
-def pinball_loss(y_true, y_pred, quantile):
-    """
-    Calculate the pinball loss for a specific quantile.
-
-    Args:
-        y_true (Tensor): The actual values.
-        y_pred (Tensor): The predicted quantile values.
-        quantile (float): The quantile to calculate the loss for (e.g., 0.1, 0.5, 0.9).
-
-    Returns:
-        Tensor: The pinball loss.
-    """
-    delta = y_true - y_pred
-    return torch.mean(torch.max(quantile * delta, (quantile - 1) * delta))

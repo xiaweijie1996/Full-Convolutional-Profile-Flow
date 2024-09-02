@@ -30,31 +30,31 @@ with open(os.path.join(_parent_path, 'exp/prediction/nl/FCPFlow/config_nl_pre.ya
 model = fcpf.FCPflow(config['FCPflow']['num_blocks'], config['FCPflow']['num_channels'], 
                         config['FCPflow']['sfactor'], config['FCPflow']['hidden_dim'], config['FCPflow']['condition_dim'])
 model.load_state_dict(torch.load(os.path.join(_parent_path, 'exp/prediction/nl/FCPFlow/FCPflow_model.pth')))
+model.eval()
 
 # find the row index with the max value and second max value in np_array_test[:,24:]
 _row_peak_indx_max = np.unravel_index(np.argmax(np_array_test[:, 24:]), np_array_test[:, 24:].shape)[0]
-_row_peak_indx_min = _row_peak_indx_max + 2
+_row_peak_indx_min = _row_peak_indx_max +3
 
-z = torch.randn(500, config['FCPflow']['condition_dim'])
-cond = torch.tensor(np_array_test[_row_peak_indx_max,:24]).view(1,-1).repeat(500,1)
+_sample_num = 500
+z = torch.randn(_sample_num, config['FCPflow']['condition_dim'])
+cond = torch.tensor(np_array_test[_row_peak_indx_max,:24]).view(1,-1).repeat(_sample_num,1)
 re_data = model.inverse(z, cond)
-re_data = torch.cat((re_data, cond), dim=1)
+re_data = torch.cat((cond, re_data), dim=1)
 pre = torch.tensor(np_array_test)
 
 # plot the data
 save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_peak_max.png')
 tp.plot_pre(pre, re_data, scaler, 24, _sample_index=_row_peak_indx_max, path=save_path)
 
-z = torch.randn(500, config['FCPflow']['condition_dim'])
-cond = torch.tensor(np_array_test[_row_peak_indx_min,:24]).view(1,-1).repeat(500,1)
+z = torch.randn(_sample_num, config['FCPflow']['condition_dim'])
+cond = torch.tensor(np_array_test[_row_peak_indx_min,:24]).view(1,-1).repeat(_sample_num,1)
 re_data = model.inverse(z, cond)
-re_data = torch.cat((re_data, cond), dim=1)
+re_data = torch.cat((cond, re_data), dim=1)
 pre = torch.tensor(np_array_test)
-
 
 save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_peak_min.png')
 tp.plot_pre(pre, re_data, scaler, 24, _sample_index=_row_peak_indx_min, path=save_path)
-
 
 # plot all the data
 save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_all.png')

@@ -98,9 +98,9 @@ def plot_pre(pre, re_data, scaler, con_dim, _sample_index=0 ,path='Generated Dat
     orig_data_pre = scaler.inverse_transform(pre.cpu().detach().numpy())
     orig_data_re = scaler.inverse_transform(re_data.cpu().detach().numpy())
     
-    _real_pre = orig_data_pre[_sample_index, -con_dim:]
-    _cond = orig_data_pre[_sample_index, -con_dim:]
-    predict_pre = orig_data_re[_sample_index, :-con_dim]
+    _real_pre = orig_data_pre[_sample_index, con_dim:]
+    _cond = orig_data_pre[_sample_index, :con_dim]
+    predict_pre = orig_data_re[_sample_index, con_dim:]
 
     # plot the real data
     _len_con, _len_pre = len(_cond), len(_real_pre)
@@ -209,52 +209,86 @@ def train_pre(path, model, train_loader, optimizer, epochs, cond_dim ,device, sc
 
         # test the model
         pre = next(iter(test_loader))[0].to(device)
-        data_test = pre[:,-cond_dim:]
-        cond_test = pre[:,:-cond_dim]
-
-        gen_test, logdet_test = model(data_test, cond_test)
-        pre_orig = scaler.inverse_transform(pre.cpu().detach().numpy())
-
-        quantiles = [0.1, 0.5, 0.9]
-        y_true = torch.tensor(pre_orig)
-        losses = []
+        data_test = pre[:,cond_dim:]
+        cond_test = pre[:,:cond_dim]
+        z = torch.randn(data_test.shape[0], data_test.shape[1]).to(device)
+        gen_test= model.inverse(z , cond_test)
+        mse = ((gen_test - data_test)**2).mean()
         
-        for quantile in quantiles:
-            # Generate multiple predictions or sample z multiple times
-            predictions = []
-            for _ in range(100):  # Example: generate 100 samples for quantile estimation
-                z = torch.randn(data_test.shape[0], data_test.shape[1]).to(device)
-                gen_test = model.inverse(z, cond_test)
-                re_data = torch.cat((gen_test, cond_test), dim=1)
-                re_data_orig = scaler.inverse_transform(re_data.cpu().detach().numpy())
-                predictions.append(re_data_orig)
-
-            # Stack predictions and calculate the quantile prediction
-            predictions = np.stack(predictions)
-            y_pred = np.percentile(predictions, quantile * 100, axis=0)
-
-            # Convert y_pred to torch tensor
-            y_pred = torch.tensor(y_pred, dtype=torch.float32)
-
-            # Calculate the pinball loss for this quantile
-            loss = pinball_loss(y_true, y_pred, quantile)
-            losses.append(loss.item())
-            
-        quantile_loss = np.mean(losses)
-
-        print('epoch: ', epoch, 'loss: ', loss.item(), 'quantile loss: ', quantile_loss)
         # save the model
-        if quantile_loss < loss_mid:
+        print('epoch: ', epoch, 'loss: ', loss.item(), 'mse loss: ', mse)
+        if mse < loss_mid:
             print('save the model')
             save_path = path + '/FCPflow_model.pth'
             torch.save(model.state_dict(), save_path)
-            loss_mid = quantile_loss
+            loss_mid = mse
+
+        # # ----------------- plot the generated data -----------------
+        # if epoch % pgap ==0: 
+        #     save_path = path + '/FCPflow_generated.png'
+        #     plot_pre(pre, re_data, scaler, cond_dim, 0, save_path)
+        # # ----------------- plot the generated data -----------------
+
+
+def train_pre_2(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True):
+    model.train()
+    mmd_mid = 100000
+    for epoch in range(epochs):
+        for _, data in enumerate(train_loader):
+            model.train()
+            pre = data[0].to(device) # + torch.randn_like(data[0].to(device))/(256)
+
+            # split the data into data and conditions
+            cond = pre[:,-cond_dim:]
+            data = pre[:,:-cond_dim] # + torch.rand_like(data[:,:-cond_dim])/(256) 
+
+            gen, logdet = model(data, cond)
+
+            # compute the log likelihood loss
+            llh = log_likelihood(gen, type='Gaussian')
+            loss = -llh.mean()-logdet
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            if scheduler is not None:
+                scheduler.step()
+
+        # ----------------- test the model -----------------
+        model.eval()
+
+        # plot the generated data
+        z = torch.randn(data.shape[0], data.shape[1]).to(device)
+        gen_test = model.inverse(z, cond)
+        re_data = torch.cat((gen_test, cond), dim=1)
+        re_data = re_data.detach()
+
+        orig_data_pre = scaler.inverse_transform(pre.cpu().detach().numpy())
+        orig_data_re = scaler.inverse_transform(re_data.cpu().detach().numpy())
+
+        # comput energy distance
+        _dis1 = MMD_kernel(orig_data_pre, orig_data_re)
+        print('epoch: ', epoch, 'loss: ', loss.item(), 'MMD: ', _dis1)
+        if _wandb:
+             wandb.log({
+                'epoch': epoch,
+                'MMD': _dis1,
+                'loss': loss.item(),
+            })
+        # ----------------- test the model -----------------
+        
+        # ----------------- save the model -----------------
+        if _dis1 < mmd_mid:
+            save_path = path + '/FCPflow_model.pth'
+            torch.save(model.state_dict(), save_path)
+            mmd_mid = _dis1
 
         # ----------------- plot the generated data -----------------
         if epoch % pgap ==0: 
-            save_path = path + '/FCPflow_generated.png'
-            plot_pre(pre, re_data, scaler, cond_dim, 0, save_path)
+            save_path = os.path.join(path, 'FCPflow_generated.png')
+            plot_figure(pre, re_data, scaler, cond_dim, save_path)
         # ----------------- plot the generated data -----------------
+
+
 
 def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True):
     model.train()
@@ -274,7 +308,7 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
             llh = log_likelihood(gen, type='Gaussian')
             loss = -llh.mean()-logdet
             optimizer.zero_grad()
-            loss.backward(retain_graph=True)
+            loss.backward()
             optimizer.step()
             if scheduler is not None:
                 scheduler.step()
@@ -304,6 +338,7 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
                 'loss': loss.item(),
             })
         # ----------------- test the model -----------------
+        
 
         # ----------------- plot the generated data -----------------
         if epoch % pgap ==0: 

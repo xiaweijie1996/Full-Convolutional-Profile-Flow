@@ -112,16 +112,5 @@ def compute_mse(pre_data, true_data):
 
 
 def pinball_loss(y_true, y_pred, quantile):
-    """
-    Calculate the pinball loss for a specific quantile.
-
-    Args:
-        y_true (Tensor): The actual values.
-        y_pred (Tensor): The predicted quantile values.
-        quantile (float): The quantile to calculate the loss for (e.g., 0.1, 0.5, 0.9).
-
-    Returns:
-        Tensor: The pinball loss.
-    """
     delta = y_true - y_pred
     return torch.mean(torch.max(quantile * delta, (quantile - 1) * delta))
