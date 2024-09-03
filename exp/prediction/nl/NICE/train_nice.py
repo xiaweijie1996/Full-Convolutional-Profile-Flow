@@ -50,6 +50,5 @@ scheduler = None
 
 # train the model
 path = os.path.join(_parent_path, 'exp/prediction/nl/NICE')
-tn.train_com_cost(path, model, dataloader_train, optimizer, 10001, config['NICE']['condition_dim'], 
+tn.train_com_cost(path, model, dataloader_train, optimizer, 40001, config['NICE']['condition_dim'], 
                   device, scaler, dataloader_train, scheduler, 200, False)
-

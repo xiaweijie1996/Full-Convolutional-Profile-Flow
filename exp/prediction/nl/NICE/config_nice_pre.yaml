@@ -2,7 +2,7 @@ NICE:
   #--------Define the model--------
   num_blocks: 5
   sfactor: 0.3
-  hidden_dim: 28
+  hidden_dim: 32
   num_channels: 24 # resolution of the time series 
   condition_dim: 24 # unconditioned generation
   net_type: 'linear'

@@ -14,6 +14,7 @@ import alg.models_fcpflow_lin as fcpf
 import tools.tools_train as tl
 import tools.tools_pre as tp
 import alg.cwgan_gp_model as md
+import alg.nice_model as nm
 
 # read the data
 data_path = os.path.join(_parent_path, 'data/train_nl_pred.csv')
@@ -58,12 +59,25 @@ recon = recon.cpu().detach()
 re_data_wgangp = torch.cat([cond.cpu().detach(), recon], dim=1)
 # ------------ load the CWGAN-GP ------------
 
+# ------------ load the NICE ------------
+with open(os.path.join(_parent_path, 'exp/prediction/nl/NICE/config_nice_pre.yaml')) as file:
+    config = yaml.load(file, Loader=yaml.FullLoader)
+nice = nm.NICE(config['NICE']['num_blocks'], config['NICE']['sfactor'], 'linear', config['NICE']['num_channels'],
+                         config['NICE']['hidden_dim'], config['NICE']['condition_dim'])
+nice.load_state_dict(torch.load(os.path.join(_parent_path, 'exp/prediction/nl/NICE/NICE_model.pth')))
+nice.eval()
+z = torch.randn(_sample_num, config['NICE']['condition_dim'])
+re_data = nice.inverse(z, cond)
+re_data_nice = torch.cat((cond, re_data), dim=1)
+# ------------ load the NICE ------------
 
 # ------------ plot the data ------------
 save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_peak_f.png')
 tp.plot_pre(pre, re_data_fcpflow, scaler, 24, _sample_index=_row_peak_indx_max, path=save_path)
 save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_peak_w.png')
 tp.plot_pre(pre, re_data_wgangp, scaler, 24, _sample_index=_row_peak_indx_max, path=save_path)
+save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_peak_n.png')
+tp.plot_pre(pre, re_data_nice, scaler, 24, _sample_index=_row_peak_indx_max, path=save_path)
 
 # plot all the data
 save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_all.png')
