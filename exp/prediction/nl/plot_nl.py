@@ -15,6 +15,7 @@ import tools.tools_train as tl
 import tools.tools_pre as tp
 import alg.cwgan_gp_model as md
 import alg.nice_model as nm
+import alg.vae_model as vm
 
 # read the data
 data_path = os.path.join(_parent_path, 'data/train_nl_pred.csv')
@@ -26,7 +27,7 @@ dataloader_train, scaler = tl.create_data_loader(np_array_train, np_array_train.
 np_array_test = scaler.transform(np_array_test)
 
 # experiment configuration
-_row_peak_indx_max = np.unravel_index(np.argmax(np_array_test[:, 24:]), np_array_test[:, 24:].shape)[0]+10
+_row_peak_indx_max = np.unravel_index(np.argmax(np_array_test[:, 24:]), np_array_test[:, 24:].shape)[0]
 _sample_num = 100
 cond = torch.tensor(np_array_test[_row_peak_indx_max,:24]).view(1,-1).repeat(_sample_num,1)
 pre = torch.tensor(np_array_test)
@@ -71,6 +72,19 @@ re_data = nice.inverse(z, cond)
 re_data_nice = torch.cat((cond, re_data), dim=1)
 # ------------ load the NICE ------------
 
+# ------------ load the VAE ------------
+with open(os.path.join(_parent_path, 'exp/prediction/nl/VAE/config_vae_pre.yaml')) as file:
+    config = yaml.load(file, Loader=yaml.FullLoader)
+vae = vm.VAE(input_shape=config['VAE']['input_shape'], cond_dim=config['VAE']['condition_dim'], 
+                latent_dim=config['VAE']['latent_dim'], hidden_dim=config['VAE']['hidden_dim'])
+vae.load_state_dict(torch.load(os.path.join(_parent_path, 'exp/prediction/nl/VAE/VAE_model.pth')))
+vae.eval()
+z = torch.randn(_sample_num, config['VAE']['latent_dim'])
+z = torch.cat([z, cond], dim=1)
+re_data = vae.decode(z)
+re_data_vae = torch.cat((cond, re_data), dim=1)
+# ------------ load the VAE ------------
+
 # ------------ plot the data ------------
 save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_peak_f.png')
 tp.plot_pre(pre, re_data_fcpflow, scaler, 24, _sample_index=_row_peak_indx_max, path=save_path)
@@ -78,6 +92,8 @@ save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_peak_w.png')
 tp.plot_pre(pre, re_data_wgangp, scaler, 24, _sample_index=_row_peak_indx_max, path=save_path)
 save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_peak_n.png')
 tp.plot_pre(pre, re_data_nice, scaler, 24, _sample_index=_row_peak_indx_max, path=save_path)
+save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_peak_v.png')
+tp.plot_pre(pre, re_data_vae, scaler, 24, _sample_index=_row_peak_indx_max, path=save_path)
 
 # plot all the data
 save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_all.png')

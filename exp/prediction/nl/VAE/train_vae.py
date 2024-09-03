@@ -45,8 +45,5 @@ optimizer = torch.optim.Adam(model .parameters(), lr=1e-3, weight_decay=0)
 parem = sum(p.numel() for p in model.encoder.parameters() if p.requires_grad)
 print('number of parameters {}'.format(parem))
 
-# wandb.init(project="com_cost")
-# wandb.log({"number of parameters": parem})
-
 # ------------------- train the model -------------------
 tvae.train_vae_pre(model, dataloader_train, optimizer, scaler, latent_dim, cond_dim, device, _parent_path, epochs=3000, log_wandb=False)
