@@ -2,9 +2,9 @@ CWGAN:
   #--------Define the model--------
   input_shape: 24
   cond_dim: 1
-  latent_dim: 18
-  hidden_dim: 50
-  condition_dim: 1
+  latent_dim: 12
+  hidden_dim: 24
+  condition_dim: 24
 
   #--------Define the training--------
   lr_min: 0.000001

@@ -114,3 +114,22 @@ def compute_mse(pre_data, true_data):
 def pinball_loss(y_true, y_pred, quantile):
     delta = y_true - y_pred
     return torch.mean(torch.max(quantile * delta, (quantile - 1) * delta))
+
+def crps(y_true, y_pred_samples):
+    """
+    Calculate the CRPS (Continuous Ranked Probability Score).
+    
+    Args:
+        y_true (ndarray): The true values.
+        y_pred_samples (ndarray): Samples from the predictive distribution.
+
+    Returns:
+        float: The CRPS score.
+    """
+    # Sort predictions and calculate differences
+    sorted_pred_samples = np.sort(y_pred_samples, axis=0)
+    diff = sorted_pred_samples - y_true
+    n = y_pred_samples.shape[0]
+    
+    crps_score = np.mean((2 * np.arange(1, n+1) - 1) * diff, axis=0) / n
+    return np.mean(crps_score)
