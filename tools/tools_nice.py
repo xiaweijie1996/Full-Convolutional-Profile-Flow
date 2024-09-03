@@ -30,6 +30,7 @@ def log_likelihood(x, type='Gaussian'):
 def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True):
     model.train()
     start_time = time.time()
+    mid_dis1 = 100000
     for epoch in range(epochs):
         for _, data in enumerate(train_loader):
             model.train()
@@ -52,8 +53,6 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
             
         # ----------------- test the model -----------------
         model.eval()
-        
-        # print('epoch: ', epoch, 'loss: ', loss.item())
 
         # plot the generated data
         z = torch.randn(data.shape[0], data.shape[1]).to(device)
@@ -66,12 +65,8 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
         
         # comput energy distance
         _dis1 = MMD_kernel(orig_data_pre, orig_data_re)
-        # _dis2 = calculate_w_distances(orig_data_pre, orig_data_re)
-        # _dis3 = calculate_energy_distances(orig_data_pre, orig_data_re)
-        # # _dis4 = calculate_autocorrelation_mse(orig_data_pre, orig_data_re)
-        # _dis5 = ks_distance(orig_data_pre, orig_data_re)
+        print('epoch: ', epoch, 'loss: ', loss.item(), 'MMD: ', _dis1)
         
-
         # ----------------- plot the generated data -----------------
         if epoch % pgap ==0: 
             save_path = path + '/NICE_generated.png'
@@ -83,14 +78,12 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
                 'time': time.time() - start_time,
                 'epoch': epoch,
                 'MMD': _dis1,
-                # 'Wasserstein': _dis2,
-                # 'Energy': _dis3,
-                # # 'Autocorrelation': _dis4,
-                # 'KS': _dis5,
                 'loss': loss.item(),
             })
-
-        # ----------------- test the model -----------------
         
-
+        # save the model
+        if _dis1 < mid_dis1:
+            mid_dis1 = _dis1
+            torch.save(model.state_dict(), path + '/NICE_model.pth')
+            print('model saved at epoch: ', epoch)
 

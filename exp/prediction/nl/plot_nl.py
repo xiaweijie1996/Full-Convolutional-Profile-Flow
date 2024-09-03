@@ -25,7 +25,7 @@ dataloader_train, scaler = tl.create_data_loader(np_array_train, np_array_train.
 np_array_test = scaler.transform(np_array_test)
 
 # experiment configuration
-_row_peak_indx_max = np.unravel_index(np.argmax(np_array_test[:, 24:]), np_array_test[:, 24:].shape)[0]
+_row_peak_indx_max = np.unravel_index(np.argmax(np_array_test[:, 24:]), np_array_test[:, 24:].shape)[0]+10
 _sample_num = 100
 cond = torch.tensor(np_array_test[_row_peak_indx_max,:24]).view(1,-1).repeat(_sample_num,1)
 pre = torch.tensor(np_array_test)
@@ -43,7 +43,7 @@ re_data_fcpflow = torch.cat((cond, re_data), dim=1)
 # ------------load the FCPflow model------------
 
 
-# ------------load the CWGAN-GP------------
+# ------------ load the CWGAN-GP ------------
 with open(os.path.join(_parent_path, 'exp/prediction/nl/WGANGP/config_cwgan_pre.yaml')) as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 input_shape = config['CWGAN']['input_shape']
@@ -56,16 +56,14 @@ z = torch.randn(cond.shape[0], latent_dim)
 recon = generator(z, cond)
 recon = recon.cpu().detach()
 re_data_wgangp = torch.cat([cond.cpu().detach(), recon], dim=1)
-print(re_data_wgangp)
-# ------------load the CWGAN-GP------------
+# ------------ load the CWGAN-GP ------------
 
 
-# ------------plot the data------------
+# ------------ plot the data ------------
 save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_peak_f.png')
 tp.plot_pre(pre, re_data_fcpflow, scaler, 24, _sample_index=_row_peak_indx_max, path=save_path)
 save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_peak_w.png')
 tp.plot_pre(pre, re_data_wgangp, scaler, 24, _sample_index=_row_peak_indx_max, path=save_path)
-
 
 # plot all the data
 save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_all.png')

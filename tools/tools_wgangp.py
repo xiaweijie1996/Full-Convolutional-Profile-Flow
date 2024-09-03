@@ -14,7 +14,7 @@ def train_cwgan(generator, discriminator, dataloader, optimizer_gen, optimizer_d
                 scaler, latent_dim, cond_dim, device, _parent_path, epochs=10001, log_wandb=False):
     # Initialize wandb if logging is enabled
     start_time = time.time()
-    path = os.path.join(_parent_path, 'exp/computational_cost/cwgan')
+    path = os.path.join(_parent_path, 'exp/prediction/nl/WGANGP')
     loss_mid = 1000
     for epoch in range(epochs):
         for _, data in enumerate(dataloader):
@@ -27,7 +27,7 @@ def train_cwgan(generator, discriminator, dataloader, optimizer_gen, optimizer_d
             data = pre[:, :-cond_dim]
             
             # Generate fake data
-            z = torch.rand(data.shape[0], latent_dim).to(device)
+            z = torch.randn(data.shape[0], latent_dim).to(device)
             gen_fake = generator(z, cond)
             
             # Discriminator forward pass
@@ -47,7 +47,7 @@ def train_cwgan(generator, discriminator, dataloader, optimizer_gen, optimizer_d
             
             # Train the generator
             for _ in range(3):
-                z = torch.rand(pre.shape[0], latent_dim).to(device)
+                z = torch.randn(pre.shape[0], latent_dim).to(device)
                 gen_fake = generator(z, cond)
                 
                 fake_label = discriminator(gen_fake, cond)
@@ -58,11 +58,11 @@ def train_cwgan(generator, discriminator, dataloader, optimizer_gen, optimizer_d
                 optimizer_gen.step()
             
         # Print the loss
-        # print(f'Epoch {epoch}, Generator Loss: {loss_gen.item()}, Discriminator Loss: {loss_dis.item()}')
+        print(f'Epoch {epoch}, Generator Loss: {loss_gen.item()}, Discriminator Loss: {loss_dis.item()}')
         
         # Evaluation and Logging
         generator.eval()
-        z = torch.rand(cond.shape[0], latent_dim).to(device)
+        z = torch.randn(cond.shape[0], latent_dim).to(device)
         recon = generator(z, cond)
         recon = recon.cpu().detach()
         re_data = torch.cat([recon, cond.cpu().detach()], dim=1)
@@ -82,9 +82,9 @@ def train_cwgan(generator, discriminator, dataloader, optimizer_gen, optimizer_d
 
 
         # Save plots every 100 epochs
-        # if epoch % 100 == 0:
-        #     save_path = os.path.join(path, 'CWGAN_generated.png')
-        #     tl.plot_figure(pre, re_data, scaler, cond_dim, save_path)
+        if epoch % 100 == 0:
+            save_path = os.path.join(path, 'CWGAN_generated.png')
+            tl.plot_figure(pre, re_data, scaler, cond_dim, save_path)
             
                     
         if log_wandb:
@@ -101,10 +101,10 @@ def train_cwgan(generator, discriminator, dataloader, optimizer_gen, optimizer_d
             })
             
         # Save the model every 
-        # if loss_dis.item() < loss_mid :
-        #     loss_mid = loss_dis.item()
-        #     torch.save(generator.state_dict(), os.path.join(path, 'generator.pth'))
-        #     torch.save(discriminator.state_dict(), os.path.join(path, 'discriminator.pth'))
+        if _dis1 < loss_mid :
+            loss_mid = _dis1
+            torch.save(generator.state_dict(), os.path.join(path, 'generator.pth'))
+            # torch.save(discriminator.state_dict(), os.path.join(path, 'discriminator.pth'))
             
     
     # Finish the wandb run if logging
@@ -129,7 +129,7 @@ def train_cwgan_pre(generator, discriminator, dataloader, optimizer_gen, optimiz
             data = pre[:, cond_dim:]
             
             # Generate fake data
-            z = torch.rand(data.shape[0], latent_dim).to(device)
+            z = torch.randn(data.shape[0], latent_dim).to(device)
             gen_fake = generator(z, cond)
             
             # Discriminator forward pass
@@ -149,7 +149,7 @@ def train_cwgan_pre(generator, discriminator, dataloader, optimizer_gen, optimiz
             
             # Train the generator
             for _ in range(3):
-                z = torch.rand(pre.shape[0], latent_dim).to(device)
+                z = torch.randn(pre.shape[0], latent_dim).to(device)
                 gen_fake = generator(z, cond)
                 
                 fake_label = discriminator(gen_fake, cond)
@@ -203,7 +203,7 @@ def train_cwgan_pre(generator, discriminator, dataloader, optimizer_gen, optimiz
             loss_mid = loss_dis.item()
             torch.save(generator.state_dict(), os.path.join(path, 'generator.pth'))
             loss_mid = _dis1
-    
+            
     # Finish the wandb run if logging
     if log_wandb:
         wandb.finish()
