@@ -78,10 +78,9 @@ def train_vae(model, dataloader, optimizer, scaler, latent_dim, cond_dim, device
     if log_wandb:
         wandb.finish()
 
-def train_vae_pre(model, dataloader, optimizer, scaler, latent_dim, cond_dim, device, _parent_path, epochs=10001, log_wandb=False):
+def train_vae_pre(model, dataloader, optimizer, scaler, latent_dim, cond_dim, device, path, epochs=10001, log_wandb=False):
     # initialize wandb if logging is enabled
     start_time = time.time()
-    path = os.path.join(_parent_path, 'exp/prediction/uk/VAE')
     mid_dis1 = 1000
     for epoch in range(epochs):
         model.train()

@@ -1,10 +1,10 @@
 CWGAN:
   #--------Define the model--------
-  input_shape: 48
-  cond_dim: 48
+  input_shape: 24
+  cond_dim: 24
   latent_dim: 24
   hidden_dim: 24
-  condition_dim: 48
+  condition_dim: 24
 
   #--------Define the training--------
   lr_min: 0.000001

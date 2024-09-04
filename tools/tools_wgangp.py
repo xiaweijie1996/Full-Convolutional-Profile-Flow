@@ -113,10 +113,8 @@ def train_cwgan(generator, discriminator, dataloader, optimizer_gen, optimizer_d
 
 
 def train_cwgan_pre(generator, discriminator, dataloader, optimizer_gen, optimizer_dis, 
-                scaler, latent_dim, cond_dim, device, _parent_path, epochs=10001, log_wandb=False):
+                scaler, latent_dim, cond_dim, device, path, epochs=10001, log_wandb=False):
     # Initialize wandb if logging is enabled
-    start_time = time.time()
-    path = os.path.join(_parent_path, 'exp/prediction/uk/WGANGP')
     loss_mid = 1000
     for epoch in range(epochs):
         for _, data in enumerate(dataloader):
@@ -159,38 +157,22 @@ def train_cwgan_pre(generator, discriminator, dataloader, optimizer_gen, optimiz
                 loss_gen.backward()
                 optimizer_gen.step()
             
-        orig_data_pre = scaler.inverse_transform(pre.cpu().detach().numpy())
-        y_true = torch.tensor(orig_data_pre[:, cond_dim:])
-        
         generator.eval()
+        z = torch.randn(cond.shape[0], latent_dim).to(device)
+        recon = generator(z, cond)
+        recon = recon.cpu().detach()
+        re_data = torch.cat([cond.cpu().detach(), recon], dim=1)
         
-        quantiles = [0.1, 0.5, 0.9]
-        losses = []
-        for quantile in quantiles:
-            # Generate multiple predictions or sample z multiple times
-            predictions = []
-            for _ in range(10):  # Example: generate 100 samples for quantile estimation
-                z = torch.randn(data.shape[0], latent_dim).to(device)
-                gen_test = generator(z, cond)
-                gen_test = torch.cat((cond, gen_test), dim=1)
-                gen_test = scaler.inverse_transform(gen_test.cpu().detach().numpy())
-                predictions.append(gen_test[:, cond_dim:])
-                
-            # Stack predictions and calculate the quantile prediction
-            predictions = np.stack(predictions)
-            y_pred = np.percentile(predictions, quantile * 100, axis=0)
-            # Convert y_pred to torch tensor
-            y_pred = torch.tensor(y_pred, dtype=torch.float32)
-            # Calculate the pinball loss for this quantile
-            loss_pl = pinball_loss(y_true, y_pred, quantile)
-            losses.append(loss_pl.item())
-
-        _dis1 = np.mean(losses)
-            
+        # Inverse scaling to original data scale
+        orig_data_re = scaler.inverse_transform(re_data.numpy())
+        orig_data_pre = scaler.inverse_transform(pre.cpu().detach().numpy())
+                    
+        # Compute the MMD (Maximum Mean Discrepancy)
+        _dis1 = MMD_kernel(orig_data_pre[:, cond_dim:], orig_data_re[:,cond_dim:])
         print(f'Epoch {epoch}, PL: {_dis1}', 'loss_dis:', loss_dis.item(), 'loss_gen:', loss_gen.item())
+        
         if log_wandb:
             wandb.log({
-                'time': time.time() - start_time,
                 'epoch': epoch,
                 'PL': _dis1,
                 'loss_dis': loss_dis.item(),
@@ -201,12 +183,13 @@ def train_cwgan_pre(generator, discriminator, dataloader, optimizer_gen, optimiz
         if _dis1 < loss_mid :
             print('Saving model')
             loss_mid = loss_dis.item()
-            torch.save(generator.state_dict(), os.path.join(path, 'generator.pth'))
+            torch.save(generator.state_dict(), os.path.join(path, 'CWGANGP.pth'))
             loss_mid = _dis1
             
+        # Save plots every 100 epochs
         if epoch % 100 == 0:
             save_path = os.path.join(path, 'CWGAN_generated.png')
-            tl.plot_pre(pre, gen_fake, scaler, cond_dim, 0, save_path)
+            tl.plot_pre(pre, re_data, scaler, cond_dim, 0, save_path)
             
     # Finish the wandb run if logging
     if log_wandb:
