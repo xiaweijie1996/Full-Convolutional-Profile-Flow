@@ -105,9 +105,8 @@ def plot_pre(pre, re_data, scaler, con_dim, _sample_index=0 ,path='Generated Dat
     # plot the real data
     _len_con, _len_pre = len(_cond), len(_real_pre)
     plt.plot(range(0, _len_con), _cond, color='blue', label='Real condition')
-    plt.plot(range(_len_con, _len_con + _len_pre), predict_pre, alpha=0.5, color='green')
+    plt.plot(range(_len_con, _len_con + _len_pre), predict_pre, alpha=0.5, color='green', label='Predicted data')
     plt.plot(range(_len_con, _len_con+_len_pre), _real_pre, color='yellow', label='Real data')
-    
     plt.legend()
     plt.savefig(path)
     plt.close()

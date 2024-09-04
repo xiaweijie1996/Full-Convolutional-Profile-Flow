@@ -3,8 +3,8 @@ NICE:
   num_blocks: 5
   sfactor: 0.3
   hidden_dim: 32
-  num_channels: 24 # resolution of the time series 
-  condition_dim: 24 # unconditioned generation
+  num_channels: 48 # resolution of the time series 
+  condition_dim: 48 # unconditioned generation
   net_type: 'linear'
 
   #--------Define the training--------

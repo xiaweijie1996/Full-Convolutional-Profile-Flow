@@ -3,8 +3,8 @@ FCPflow:
   num_blocks: 8
   sfactor: 0.8
   hidden_dim: 24
-  num_channels: 24 # resolution of the time series 
-  condition_dim: 24 # unconditioned generation
+  num_channels: 48 # resolution of the time series 
+  condition_dim: 48 # unconditioned generation
 
   #--------Define the training--------  
   lr_min: 0.0001

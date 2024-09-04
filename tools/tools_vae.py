@@ -81,7 +81,7 @@ def train_vae(model, dataloader, optimizer, scaler, latent_dim, cond_dim, device
 def train_vae_pre(model, dataloader, optimizer, scaler, latent_dim, cond_dim, device, _parent_path, epochs=10001, log_wandb=False):
     # initialize wandb if logging is enabled
     start_time = time.time()
-    path = os.path.join(_parent_path, 'exp/prediction/nl/VAE')
+    path = os.path.join(_parent_path, 'exp/prediction/uk/VAE')
     mid_dis1 = 1000
     for epoch in range(epochs):
         model.train()
@@ -124,7 +124,7 @@ def train_vae_pre(model, dataloader, optimizer, scaler, latent_dim, cond_dim, de
         # save plots every 100 epochs
         if epoch % 100 == 0:
             save_path = os.path.join(path, 'vae.png')
-            tl.plot_figure(pre, re_data, scaler, cond_dim, save_path)
+            tl.plot_pre(pre, re_data, scaler, cond_dim, _sample_index=0, path=save_path)
             
         if log_wandb:
             wandb.log({
@@ -137,6 +137,7 @@ def train_vae_pre(model, dataloader, optimizer, scaler, latent_dim, cond_dim, de
         # save the model
         if _dis1 < mid_dis1:
             mid_dis1 = _dis1
+            print('model saved at epoch: ', epoch)
             torch.save(model.state_dict(), os.path.join(path, 'VAE_model.pth'))
             
     # finish the wandb run if logging

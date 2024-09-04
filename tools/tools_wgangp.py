@@ -116,7 +116,7 @@ def train_cwgan_pre(generator, discriminator, dataloader, optimizer_gen, optimiz
                 scaler, latent_dim, cond_dim, device, _parent_path, epochs=10001, log_wandb=False):
     # Initialize wandb if logging is enabled
     start_time = time.time()
-    path = os.path.join(_parent_path, 'exp/prediction/nl/WGANGP')
+    path = os.path.join(_parent_path, 'exp/prediction/uk/WGANGP')
     loss_mid = 1000
     for epoch in range(epochs):
         for _, data in enumerate(dataloader):
@@ -203,6 +203,10 @@ def train_cwgan_pre(generator, discriminator, dataloader, optimizer_gen, optimiz
             loss_mid = loss_dis.item()
             torch.save(generator.state_dict(), os.path.join(path, 'generator.pth'))
             loss_mid = _dis1
+            
+        if epoch % 100 == 0:
+            save_path = os.path.join(path, 'CWGAN_generated.png')
+            tl.plot_pre(pre, gen_fake, scaler, cond_dim, 0, save_path)
             
     # Finish the wandb run if logging
     if log_wandb:

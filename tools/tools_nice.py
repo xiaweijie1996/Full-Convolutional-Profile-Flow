@@ -131,7 +131,7 @@ def train_nice_pre(path, model, train_loader, optimizer, epochs, cond_dim ,devic
         # ----------------- plot the generated data -----------------
         if epoch % pgap ==0: 
             save_path = path + '/NICE_generated.png'
-            tl.plot_figure(pre, re_data, scaler, cond_dim, save_path)
+            tl.plot_pre(pre, re_data, scaler, cond_dim, 0, save_path)
         # ----------------- plot the generated data -----------------
 
         if _wandb:

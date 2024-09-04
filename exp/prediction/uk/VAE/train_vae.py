@@ -20,14 +20,14 @@ import tools.tools_vae as tvae
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # import the configuration
-with open(os.path.join(_parent_path,'exp/prediction/nl/VAE/config_vae_pre.yaml')) as file:
+with open(os.path.join(_parent_path,'exp/prediction/uk/VAE/config_vae_pre.yaml')) as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
         
 # define the data loader
-data_path = os.path.join(_parent_path, 'data/train_nl_pred.csv')
+data_path = os.path.join(_parent_path, 'data/train_uk_pred.csv')
 # read the data from the second column to the end
 np_array_train = pd.read_csv(data_path).iloc[:,1:].values
-data_path = os.path.join(_parent_path, 'data/test_nl_pred.csv')
+data_path = os.path.join(_parent_path, 'data/test_uk_pred.csv')
 np_array_test = pd.read_csv(data_path).iloc[:,1:].values
 
 # stack one extra column of zeros to the data as the condition
@@ -46,4 +46,4 @@ parem = sum(p.numel() for p in model.encoder.parameters() if p.requires_grad)
 print('number of parameters {}'.format(parem))
 
 # ------------------- train the model -------------------
-tvae.train_vae_pre(model, dataloader_train, optimizer, scaler, latent_dim, cond_dim, device, _parent_path, epochs=3000, log_wandb=False)
+tvae.train_vae_pre(model, dataloader_train, optimizer, scaler, latent_dim, cond_dim, device, _parent_path, epochs=500, log_wandb=False)
