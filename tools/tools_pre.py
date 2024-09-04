@@ -54,7 +54,7 @@ def plot_pre(pre, re_data_fcpflow, scaler, con_dim, re_data_list=None, _sample_i
     # Add grid, labels, legend, and limits
     plt.grid(True)
     plt.xlim(0, _len_con + _len_pre)
-    plt.ylim(0, max(_real_pre) * 1.1)
+    plt.ylim(min(_real_pre)-5, max(_real_pre) * 1.3)
     plt.xticks(fontsize=front_size, fontproperties=font_prop)
     plt.yticks(fontsize=front_size, fontproperties=font_prop)
 
