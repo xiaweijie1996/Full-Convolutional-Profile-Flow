@@ -156,7 +156,7 @@ def train(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler
         if _save:
             if loss_test.item() < loss_mid:
                 print('save the model')
-                save_path = path + 'FCPflow_model.pth'
+                save_path = os.path.join(path, 'FCPflow_model.pth')
                 torch.save(model.state_dict(), save_path)
                 loss_mid = loss_test.item()
             
@@ -250,7 +250,6 @@ def train_pre(path, model, train_loader, optimizer, epochs, cond_dim ,device, sc
             torch.save(model.state_dict(), save_path)
             loss_mid = mse
 
-
 def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, scheduler, pgap=100, _wandb=True):
     model.train()
     start_time = time.time()
@@ -299,13 +298,13 @@ def train_com_cost(path, model, train_loader, optimizer, epochs, cond_dim ,devic
                 'loss': loss.item(),
             })
         # ----------------- test the model -----------------
-        
 
         # ----------------- plot the generated data -----------------
         if epoch % pgap ==0: 
             save_path = os.path.join(path, 'FCPflow_generated.png')
             plot_figure(pre, re_data, scaler, cond_dim, save_path)
         # ----------------- plot the generated data -----------------
+        
 
 
 def train_data_ana(path, model, train_loader, optimizer, epochs, cond_dim ,device, scaler, test_loader, 

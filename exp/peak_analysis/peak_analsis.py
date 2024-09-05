@@ -31,7 +31,7 @@ def plot_peak_times(results, resolution, country, models):
     all_peak_times = []
     
     # Change the colormap to a blue-tinted one
-    colors = plt.cm.get_cmap('PuBu', len(models))  # Use 'coolwarm' for a balanced color map
+    colors = plt.cm.get_cmap('coolwarm_r', len(models))  # Use 'coolwarm' for a balanced color map
     
     # Adjust figure size for a long and narrow layout
     plt.figure(figsize=(16, 3))  # Even longer and narrower
