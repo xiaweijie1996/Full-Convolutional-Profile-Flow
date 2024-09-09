@@ -58,7 +58,7 @@ pipeline = FCPflowPipeline(
     num_blocks = 2,  # Number of blocks in the model
     num_channels = 24,  # Resolution of the time series 
     hidden_dim = 12,  # Dimension of the hidden layers
-    condition_dim = 1,  # Dimension of the condition vector, must be larger than 1
+    condition_dim = 2,  # Dimension of the condition vector, must be larger than 1
     sfactor = 0.3,  # Scaling factor
 )
 
@@ -81,7 +81,7 @@ num_iter = 801 # number of iterations
 save_path = ''  # path to save the model and the figures
 val_array = None # validation data
 train_scheduler = False # whether to use the learning rate scheduler
-pipeline.train_model(num_iter, np_array, val_array, save_path, device='cpu', train_scheduler=train_scheduler)
+pipeline.train_model(num_iter, np_array[:20, :], val_array, save_path, device='cpu', train_scheduler=train_scheduler)
 
 # Load the trained model (If you have trained model, you can directly load)
 model_path = save_path + 'FCPflow_model.pth'
@@ -91,7 +91,7 @@ model = pipeline.load_model(model_path)
 # In this step we fit a scaler
 pipeline.data_processing(np_array, None)
 
-# Sample from the trained model
+# Sample from the trained model based on the conditions
 condition_array = np_array[:10, -1:]
 samples = pipeline.sample_from_trained_model(condition_array, device='cpu')
 
