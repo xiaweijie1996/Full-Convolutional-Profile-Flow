@@ -77,7 +77,11 @@ pipeline._define_learning_set()
 pipeline._define_model()
 
 # Train the model
-pipeline.train_model(1, np_array[:20,:], None, save_path, device='cpu', train_scheduler=False)
+num_iter = 801 # number of iterations
+save_path = ''  # path to save the model and the figures
+val_array = None # validation data
+train_scheduler = False # whether to use the learning rate scheduler
+pipeline.train_model(num_iter, np_array, val_array, save_path, device='cpu', train_scheduler=train_scheduler)
 
 # Load the trained model (If you have trained model, you can directly load)
 model_path = save_path + 'FCPflow_model.pth'
