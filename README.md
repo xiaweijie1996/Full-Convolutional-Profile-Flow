@@ -65,7 +65,7 @@ pipeline = FCPflowPipeline(
 # Define the save path
 save_path = ''  # Directory where model and outputs will be saved
 
-# Prepare the data (this data is provide in path 'data/nl_data_1household.csv' in repository)
+# Prepare the data (this data is provided in path 'data/nl_data_1household.csv' in the repository)
 data_path = r'nl_data_1household.csv'
 data_array = pd.read_csv(data_path).iloc[:, 3:-2].values # data array
 condition_array = pd.read_csv(data_path).iloc[:, -2:].values # condition array
@@ -83,24 +83,24 @@ val_array = None # validation data
 train_scheduler = False # whether to use the learning rate scheduler
 pipeline.train_model(num_iter, np_array[:20, :], val_array, save_path, device='cpu', train_scheduler=train_scheduler)
 
-# Load the trained model (If you have trained model, you can directly load)
+# Load the trained model (If you have a trained model, you can directly load it)
 model_path = save_path + 'FCPflow_model.pth'
 model = pipeline.load_model(model_path)
 
-# This step is neccessary as we scale the data in trianing
+# This step is necessary as we scale the data in training
 # In this step we fit a scaler
 pipeline.data_processing(np_array, None)
 
 # Sample from the trained model based on the conditions
-condition_array = np_array[:10, -1:]
+condition_array = np_array[:10, -2:]
 samples = pipeline.sample_from_trained_model(condition_array, device='cpu')
 
 # Plot the samples
-plt.plot(samples[:, :-1].T)
+plt.plot(samples[:, :-2].T)
 plt.savefig(save_path + 'sample.png')
 ```
 
-We train few step and save the generation results of these steps which are shown below 
+We train a few steps and save the generation results of these steps which are shown below 
 
 <p align="center">
   <img src="materials/demo.gif" alt="Top Bar", width="500">
