@@ -66,10 +66,11 @@ pipeline = FCPflowPipeline(
 save_path = ''  # Directory where model and outputs will be saved
 
 # Prepare the data (this data is provide in path 'data/nl_data_1household.csv' in repository)
-data_path = 'nl_data_1household.csv'
-np_array = pd.read_csv(data_path).iloc[:, 3:-2].values
-np_array = np_array[~pd.isna(np_array).any(axis=1)]
-np_array = np.hstack((np_array, np.ones((np_array.shape[0], 1))))
+data_path = r'nl_data_1household.csv'
+data_array = pd.read_csv(data_path).iloc[:, 3:-2].values # data array
+condition_array = pd.read_csv(data_path).iloc[:, -2:].values # condition array
+np_array = np.hstack((data_array, condition_array)) # concate
+np_array = np_array[~pd.isna(np_array).any(axis=1)] # cancel nan
 
 # Define the learning set and the model 
 pipeline._define_learning_set()
