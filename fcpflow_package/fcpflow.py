@@ -141,7 +141,7 @@ if __name__ == "__main__":
     
     pipeline.train_model(10, np_array, None, save_path, device='cpu', train_scheduler=False)
     
-    model_path = save_path +'FCPflow_model.pth'
+    model_path = os.path.join(save_path, 'FCPflow_model.pth')
     model = pipeline.load_model(model_path)
     pipeline.data_processing(np_array, None)
     
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     # plot the samples
     print(samples.shape)
     plt.plot(samples[:,:-1].T)
-    plt.savefig(save_path+'sample.png')
+    plt.savefig(save_path+'/sample.png')
     
     
     
