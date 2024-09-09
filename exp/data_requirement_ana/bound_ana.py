@@ -13,7 +13,7 @@ import tools.evaluation_m as em
 font_path = 'tools/TIMES.TTF'
 font_prop = fm.FontProperties(fname=font_path)
 plt.rcParams['font.family'] = font_prop.get_name()
-front_size = 15
+front_size = 25
 
 # read the data
 data_path = os.path.join(_parent_path, 'data/nl_data_1household.csv')
@@ -45,7 +45,7 @@ mmd_train_data_indx = [100/100, 60/100, 30/100, 10/100]
 x_axis = np.linspace(0.1, 1, 10)
 
 # Create the figure with a long and narrow aspect ratio
-plt.figure(figsize=(14, 5))  # Long and narrow figure
+plt.figure(figsize=(14, 7))  # Long and narrow figure
 
 # Plot the MMD curves and scatter points
 plt.plot(x_axis, mmd_s, label='MMD between training and test data')

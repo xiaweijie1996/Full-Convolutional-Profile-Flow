@@ -27,7 +27,7 @@ dataloader_train, scaler = tl.create_data_loader(np_array_train, np_array_train.
 np_array_test = scaler.transform(np_array_test)
 
 # experiment configuration
-_row_peak_indx_max = np.unravel_index(np.argmax(np_array_test[:, 24:]), np_array_test[:, 24:].shape)[0]-2
+_row_peak_indx_max = np.unravel_index(np.argmax(np_array_test[:, 24:]), np_array_test[:, 24:].shape)[0]-1
 _sample_num = 100
 cond = torch.tensor(np_array_test[_row_peak_indx_max,:24]).view(1,-1).repeat(_sample_num,1)
 pre = torch.tensor(np_array_test)
@@ -88,7 +88,7 @@ re_data_vae = torch.cat((cond, re_data), dim=1)
 
 # ------------ plot the data ------------
 save_path = os.path.join(_parent_path, 'exp/prediction/nl', 'nl_peak_all.png')
-re_data_list = [re_data_wgangp, re_data_nice, re_data_vae]
+re_data_list = None
 tp.plot_pre(pre, re_data_fcpflow, scaler, 24, re_data_list, _sample_index=_row_peak_indx_max, path=save_path)
 
 # plot all the data

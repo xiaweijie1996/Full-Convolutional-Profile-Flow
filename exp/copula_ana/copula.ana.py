@@ -98,8 +98,8 @@ for label in plt.gca().get_xticklabels():
 for label in plt.gca().get_yticklabels():
     label.set_fontproperties(font_prop)  # Apply font properties to y-ticks
     label.set_fontsize(_size-6)  # Ensure the size is applied
-plt.xlabel('Cumulative Probability $u_1$ [-]', fontsize=_size, fontproperties=font_prop)
-plt.ylabel('Cumulative Probability $u_2$ [-]', fontsize=_size, fontproperties=font_prop)
+plt.xlabel('Cumulative Probability $u_{1}$ [-]', fontsize=_size, fontproperties=font_prop)
+plt.ylabel('Cumulative Probability $u_{2}$ [-]', fontsize=_size, fontproperties=font_prop)
 
 plt.savefig(os.path.join(_parent_path, 'exp/copula_ana/cdf_plot.png'))
 plt.close()
