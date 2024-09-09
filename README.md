@@ -88,7 +88,7 @@ model_path = save_path + 'FCPflow_model.pth'
 model = pipeline.load_model(model_path)
 
 # This step is neccessary as we scale the data in trianing
-# In thes step we fit a scaler
+# In this step we fit a scaler
 pipeline.data_processing(np_array, None)
 
 # Sample from the trained model
