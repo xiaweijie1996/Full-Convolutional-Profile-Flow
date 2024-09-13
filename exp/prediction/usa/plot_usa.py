@@ -27,7 +27,7 @@ dataloader_train, scaler = tl.create_data_loader(np_array_train, np_array_train.
 np_array_test = scaler.transform(np_array_test)
 
 # experiment configuration
-_row_peak_indx_max = np.unravel_index(np.argmax(np_array_test[:, 96:]), np_array_test[:, 96:].shape)[0]+6
+_row_peak_indx_max = np.unravel_index(np.argmax(np_array_test[:, 96:]), np_array_test[:, 96:].shape)[0]-1
 _sample_num = 100
 cond = torch.tensor(np_array_test[_row_peak_indx_max,:96]).view(1,-1).repeat(_sample_num,1)
 pre = torch.tensor(np_array_test)

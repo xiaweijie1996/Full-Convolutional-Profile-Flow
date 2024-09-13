@@ -34,17 +34,17 @@ def plot_pre(pre, re_data_fcpflow, scaler, con_dim, re_data_list=None, _sample_i
     plt.plot(range(0, _len_con), _cond, color='black', label='Real condition', linewidth=1.5)
 
     # Plot the 95% prediction interval for FCPflow (light blue)
-    plt.fill_between(range(_len_con, _len_con + _len_pre), lower_bound, upper_bound, color='lightblue', alpha=0.5, label='90% Prediction Interval (FCPflow)')
+    plt.fill_between(range(_len_con, _len_con + _len_pre), lower_bound, upper_bound, color='lightblue', alpha=0.5, label='90% Prediction Interval (FCPFlow)')
 
     # Plot the average prediction for FCPflow using a thicker purple line
-    plt.plot(range(_len_con, _len_con + _len_pre), avg_prediction_fcpflow, color='purple', label='Mean Prediction (FCPflow)', linewidth=2.5)
+    plt.plot(range(_len_con, _len_con + _len_pre), avg_prediction_fcpflow, color='purple', label='Mean Prediction (FCPFlow)', linewidth=2.5)
 
     # Plot the real data in blue, labeled as "True"
     plt.plot(range(_len_con, _len_con + _len_pre), _real_pre, color='blue', label='True', linewidth=1.5)
 
     # Plot the highest and lowest predictions for FCPflow without filling
-    plt.plot(range(_len_con, _len_con + _len_pre), highest_prediction_fcpflow, color='red', linestyle=':', label='Highest Prediction (FCPflow)', linewidth=1.5)
-    plt.plot(range(_len_con, _len_con + _len_pre), lowest_prediction_fcpflow, color='green', linestyle=':', label='Lowest Prediction (FCPflow)', linewidth=1.5)
+    plt.plot(range(_len_con, _len_con + _len_pre), highest_prediction_fcpflow, color='red', linestyle=':', label='Highest Prediction (FCPFlow)', linewidth=1.5)
+    plt.plot(range(_len_con, _len_con + _len_pre), lowest_prediction_fcpflow, color='green', linestyle=':', label='Lowest Prediction (FCPFlow)', linewidth=1.5)
 
     # Plot the average predictions for each dataset in re_data_list with requested colors and line styles
     model_names = ['cWGAN-GP', 'cNICE', 'cVAE']
@@ -58,7 +58,7 @@ def plot_pre(pre, re_data_fcpflow, scaler, con_dim, re_data_list=None, _sample_i
             plt.plot(range(_len_con, _len_con + _len_pre), avg_prediction_item, label=f'Mean Prediction ({model_names[idx]})', color=colors[idx], linestyle=linestyles[idx], linewidth=1)
 
     # Add grid, labels, legend, and limits
-    _min = min((_real_pre.min(), 0, lowest_prediction_fcpflow.min()))
+    _min = min((_real_pre.min(), 0)) # , lowest_prediction_fcpflow.min()
     _max = max((_real_pre.max(), highest_prediction_fcpflow.max()))
     plt.grid(True)
     plt.xlim(0, _len_con + _len_pre)
@@ -69,7 +69,7 @@ def plot_pre(pre, re_data_fcpflow, scaler, con_dim, re_data_list=None, _sample_i
     # Add labels and legend
     plt.xlabel('Time [Hours]', fontsize=front_size, fontproperties=font_prop)
     plt.ylabel('Consumption [kWh]', fontsize=front_size, fontproperties=font_prop)
-    plt.legend(fontsize=front_size, prop=font_prop, loc='lower left') # , bbox_to_anchor=(0, 1)
+    plt.legend(fontsize=front_size, prop=font_prop, loc='upper left') # , bbox_to_anchor=(0, 1)
 
     # Save the figure
     plt.savefig(path)
